@@ -299,95 +299,95 @@ const HomePage = () => {
   };
 
   return (
-    <React.Fragment>
-      <NavBar />
-      <Grid container>
-        <Grid item xs={2}>
-          <div className="filters">
-            <Grid container direction="column">
-              <Grid item>
-                <Button variant="contained" onClick={handleClearFilters}>
-                  Clear filters
-                </Button>
+    <div style={{ background: "#7E5CAD" }}>
+      <React.Fragment>
+        <NavBar />
+        <Grid container>
+          <Grid item xs={2}>
+            <div className="filters">
+              <Grid container direction="column">
+                <Grid item>
+                  <Button variant="contained" onClick={handleClearFilters}>
+                    Clear filters
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <SearchComponent
+                    onChange={handleSearch}
+                    searchValue={searchValue}
+                  />
+                </Grid>
+                <Grid item>
+                  <SortComponent onChange={handleSort} sortValue={sortValue} />
+                </Grid>
+                <Grid item>
+                  <CategoryComponent
+                    onChange={handleCatChange}
+                    categoryValue={category}
+                  />
+                </Grid>
+                <Grid item>
+                  <PriceRangeComponent
+                    minPriceDinamic={minPriceDinamic}
+                    maxPriceDinamic={maxPriceDinamic}
+                    minPrice={minPrice}
+                    maxPrice={maxPrice}
+                    priceRange={priceRange}
+                    handleMaxPrice={handleMaxPrice}
+                    handleMinPrice={handleMinPrice}
+                    handlePriceRange={handlePriceRange}
+                  />
+                </Grid>
               </Grid>
-              <Grid item>
-                <SearchComponent
-                  onChange={handleSearch}
-                  searchValue={searchValue}
+              <div>
+                <BrandListComponent
+                  allbrandList={allbrandList}
+                  onChange={handleChanges}
                 />
-              </Grid>
-              <Grid item>
-                <SortComponent onChange={handleSort} sortValue={sortValue} />
-              </Grid>
-              <Grid item>
-                <CategoryComponent
-                  onChange={handleCatChange}
-                  categoryValue={category}
-                />
-              </Grid>
-              <Grid item>
-                <PriceRangeComponent
-                  minPriceDinamic={minPriceDinamic}
-                  maxPriceDinamic={maxPriceDinamic}
-                  minPrice={minPrice}
-                  maxPrice={maxPrice}
-                  priceRange={priceRange}
-                  handleMaxPrice={handleMaxPrice}
-                  handleMinPrice={handleMinPrice}
-                  handlePriceRange={handlePriceRange}
-                />
-              </Grid>
-            </Grid>
-            <div>
-              <BrandListComponent
-                allbrandList={allbrandList}
-                onChange={handleChanges}
-              />
+              </div>
             </div>
-          </div>
-        </Grid>
-        <Grid item xs={10}>
-          <div className="products">
-            <Grid container gap={3}>
-              {productList.length !== 0 ? (
-                productList
-                  .slice(pagination.from, pagination.to)
-                  .map((product) => {
-                    return (
+          </Grid>
+          <Grid item xs={10}>
+            <div className="products">
+              <Grid container gap={3}>
+                {productList.length !== 0 ? (
+                  productList
+                    .slice(pagination.from, pagination.to)
+                    .map((product) => (
                       <Grid item key={product._id}>
                         <ProductCard
                           key={product._id}
                           product={product}
-                          getProduct={() => getProduct()}
+                          getProduct={getProduct}
                         />
                       </Grid>
-                    );
-                  })
-              ) : (
-                <Grid container direction="column" alignContent="center">
-                  <img src={not_found_pic} />
-                </Grid>
-              )}
-            </Grid>
-          </div>
+                    ))
+                ) : (
+                  <Grid container direction="column" alignContent="center">
+                    <img src={not_found_pic} alt="Not Found" />
+                  </Grid>
+                )}
+              </Grid>
+            </div>
+          </Grid>
         </Grid>
-      </Grid>
-      <Grid
-        container
-        alignContent="center"
-        justifyContent="center"
-        direction="column"
-      >
-        <Grid item xs>
-          <Pagination
-            count={Math.ceil(pagination.count / pageSize)}
-            color="primary"
-            onChange={(e, value) => handlePagination(e, value)}
-          />
+        <Grid
+          container
+          alignContent="center"
+          justifyContent="center"
+          direction="column"
+        >
+          <Grid item xs>
+            <Pagination
+              count={Math.ceil(pagination.count / pageSize)}
+              color="primary"
+              onChange={(e, value) => handlePagination(e, value)}
+            />
+          </Grid>
         </Grid>
-      </Grid>
-      <br />
-    </React.Fragment>
+        <br />
+      </React.Fragment>
+    </div>
   );
 };
 

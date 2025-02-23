@@ -1,13 +1,11 @@
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import RequiredAuth from "./util/authRoutes";
-
 import HomePage from "./pages/HomePage";
 import AddProductPage from "./pages/AddProductPage";
 import UpdateProductPage from "./pages/UpdateProductPage";
 import AuthPage from "./pages/AuthPage";
 import CartPage from "./pages/CartPage";
-
 import { AuthContext } from "./context/authContext";
 import { useState } from "react";
 import AdminPage from "./pages/AdminPage";

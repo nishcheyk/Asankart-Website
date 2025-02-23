@@ -1,0 +1,183 @@
+/* Navbar Container */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #474e93;
+  padding: 10px 15px;
+  box-shadow: 0 4px 6px rgba(91, 2, 216, 0.5);
+  flex-wrap: wrap;
+  position: relative;
+}
+
+/* Left Side Menu */
+.navbar-menu {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Center Logo */
+.navbar-logo-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  min-width: 100px;
+  max-width: 200px;
+}
+
+.navbar-logo {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Right Side Items */
+.navbar-items {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Buttons (Unified Styling) */
+button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+  background-color: #fff;
+  border: none;
+  border-radius: 25px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: rgba(126, 92, 173, 0.7);
+  color: #fff;
+}
+
+/* Cart Icon */
+.navbar-cart {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: rgba(135, 103, 179, 0.9);
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  color: white;
+}
+
+/* Cart Count */
+.cart-count {
+  background: white;
+  color: black;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+  position: absolute;
+  top: -5px;
+  right: -10px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .navbar-menu,
+  .navbar-items {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .navbar-button {
+    width: auto;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 8px 10px;
+  }
+
+  .navbar-menu {
+    gap: 8px;
+  }
+
+  .navbar-logo {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .navbar-items {
+    gap: 8px;
+  }
+
+  button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .navbar-cart {
+    font-size: 16px;
+    padding: 6px 10px;
+  }
+
+  .cart-count {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+}
+
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  padding: 5px 10px;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 25px;
+  overflow: hidden;
+  z-index: 1000;
+  width: 150px;
+}
+
+.dropdown-item {
+  display: block;
+  margin: 10px 5px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(126, 92, 173, 0.7);
+  color: white;
+}

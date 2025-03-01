@@ -2,20 +2,18 @@
 /* Width of the scrollbar */
 ::-webkit-scrollbar {
   width: 20px; /* Vertical scrollbar */
-  height: 20px; /* Horizontal scrollbar */
 }
 
-/* Track (background) */
 ::-webkit-scrollbar-track {
   background: #4b4376;
 }
-/* Handle (scrollbar itself) */
+
 ::-webkit-scrollbar-thumb {
   background: #432e54;
   border-radius: 30px;
 }
 
-/* Handle on hover */
+
 ::-webkit-scrollbar-thumb:hover {
   background: #6a1e55;
 }

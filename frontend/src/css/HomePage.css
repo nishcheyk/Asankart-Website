@@ -1,4 +1,25 @@
 /* Ensures full width and height usage */
+/* Width of the scrollbar */
+::-webkit-scrollbar {
+  width: 20px; /* Vertical scrollbar */
+  height: 12px; /* Horizontal scrollbar */
+}
+
+/* Track (background) */
+::-webkit-scrollbar-track {
+  background: #4b4376;
+}
+/* Handle (scrollbar itself) */
+::-webkit-scrollbar-thumb {
+  background: #432e54;
+  border-radius: 30px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #6a1e55;
+}
+
 .homepage-container {
   display: flex;
   flex-direction: column;
@@ -44,7 +65,7 @@ body {
   flex-direction: column;
   gap: 15px;
   position: fixed; /* Changed from fixed */
-   margin: 7% 0%; /* Adjusted to prevent overlap */
+  margin-top: 120px; /* Adjusted to prevent overlap */
   left: 20px;
   overflow: hidden; /* Prevents scrollbars */
 }
@@ -67,16 +88,16 @@ body {
 
 /* Products section */
 .products {
-  margin-left: max(19%, 280px);
+  margin-left: max(15%, 320px);
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   justify-content: flex-start;
   padding: 20px;
   min-width: 330px;
-  width: calc(100% - 280px); /* Fixed width */
-  max-width: calc(100% - 280px); /* Prevents overflow */
-  transition: 0.3s;
+  width: calc(100% - 400px); /* Fixed width */
+  max-width: calc(100% - 400px); /* Prevents overflow */
+  transition: 0.5s;
 }
 
 /* Ensures empty state is centered */

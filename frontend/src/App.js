@@ -7,10 +7,11 @@ import UpdateProductPage from "./pages/UpdateProductPage";
 import AuthPage from "./pages/AuthPage";
 import CartPage from "./pages/CartPage";
 import { AuthContext } from "./context/authContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminPage from "./pages/AdminPage";
 import OrdersPage from "./pages/OrdersPage";
 import ContactUs from "./pages/ContactUs";
+import Loader from "./components/Loader"; // Import Loader component
 
 function App() {
   const [userLoggedData, setUserLoggedData] = useState({
@@ -18,13 +19,25 @@ function App() {
     userId: null,
     isAdmin: false,
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate async authentication check
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+    if (token && userId) {
+      setUserLoggedData({ token, userId, isAdmin });
+    }
+     setLoading(false); // Stop loading after checking
+  }, []);
 
   const login = (token, userId, isAdmin) => {
-    //console.log("app token", token);
     localStorage.setItem("token", token);
     localStorage.setItem("userId", userId);
     localStorage.setItem("isAdmin", isAdmin);
-    setUserLoggedData({ token: token, userId: userId, isAdmin: isAdmin });
+    setUserLoggedData({ token, userId, isAdmin });
   };
 
   const logout = () => {
@@ -34,14 +47,16 @@ function App() {
     localStorage.removeItem("isAdmin");
   };
 
+  if (loading) return <Loader />; // Show loader while checking authentication
+
   return (
     <AuthContext.Provider
       value={{
         token: userLoggedData.token,
         userId: userLoggedData.userId,
         isAdmin: userLoggedData.isAdmin,
-        login: login,
-        logout: logout,
+        login,
+        logout,
       }}
     >
       <Routes>
@@ -49,7 +64,7 @@ function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/contact" element={<ContactUs />} />
-        {/* protected views*/}
+        {/* Protected routes */}
         <Route
           path="/addProduct"
           element={

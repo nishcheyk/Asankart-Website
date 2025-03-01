@@ -1,5 +1,5 @@
 .contact-container {
-  max-width: 500px;
+  width: 800px;
   margin: 50px auto;
   padding: 20px;
   background: #ffffff;
@@ -20,7 +20,7 @@ form {
 
 input,
 textarea {
-  width: 100%;
+  width: 98%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;

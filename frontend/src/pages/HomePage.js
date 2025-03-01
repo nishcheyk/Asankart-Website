@@ -10,6 +10,7 @@ import SortComponent from "../filterComponents/SortComponent";
 import CategoryComponent from "../filterComponents/CategoryComponent";
 import PriceRangeComponent from "../filterComponents/PriceRangeComponent";
 import BrandListComponent from "../filterComponents/BrandListComponent";
+import Loader from "../components/Loader";
 
 const pageSize = 10;
 
@@ -26,6 +27,7 @@ const HomePage = () => {
   const [category, setCategory] = useState("all");
   const [sortValue, setSortValue] = useState("Select value");
   const [allbrandList, setAllBrandList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     count: 100,
     from: 0,
@@ -43,6 +45,7 @@ const HomePage = () => {
   }, [pagination.from, pagination.to, productList, pagination.count]);
 
   useEffect(() => {
+    setLoading(true);
     getProduct();
   }, []);
 
@@ -75,6 +78,7 @@ const HomePage = () => {
     } catch (e) {
       console.log(e);
     }
+    setLoading(false);
   };
 
   const handleClearFilters = () => {
@@ -196,37 +200,46 @@ const HomePage = () => {
           onChange={handleChanges}
         />
       </div>
-      <div className="products">
-        {productList.length !== 0 ? (
-          productList
-            .slice(pagination.from, pagination.to)
-            .map((product) => (
-              <ProductCard
-                key={product._id}
-                product={product}
-                getProduct={getProduct}
-              />
-            ))
-        ) : (
-          <div className="no-products">
-            <img src={not_found_pic} alt="Not Found" />
+      {loading ? (
+        <Loader />
+      ) : (
+        <>
+          <div className="products">
+            {productList.length !== 0 ? (
+              productList
+                .slice(pagination.from, pagination.to)
+                .map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    getProduct={getProduct}
+                  />
+                ))
+            ) : (
+              <div className="no-products">
+                <img src={not_found_pic} alt="Not Found" />
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      <div className="pagination">
-        <Pagination
-          count={Math.ceil(pagination.count / pageSize)}
-          onChange={(e, value) => handlePagination(e, value)}
-          sx={{
-            "& .MuiPaginationItem-root": { color: "white" }, // Text color
-            "& .Mui-selected": { backgroundColor: "#493d9e", color: "white" }, // Selected page color
-            "& .MuiPaginationItem-root:hover": {
-              backgroundColor: "#66BB6A",
-              color: "white",
-            }, // Hover effect
-          }}
-        />
-      </div>
+          <div className="pagination">
+            <Pagination
+              count={Math.ceil(pagination.count / pageSize)}
+              onChange={(e, value) => handlePagination(e, value)}
+              sx={{
+                "& .MuiPaginationItem-root": { color: "white" }, // Text color
+                "& .Mui-selected": {
+                  backgroundColor: "#493d9e",
+                  color: "white",
+                }, // Selected page color
+                "& .MuiPaginationItem-root:hover": {
+                  backgroundColor: "#66BB6A",
+                  color: "white",
+                },
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

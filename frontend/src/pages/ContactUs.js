@@ -1,93 +1,207 @@
-import React, { useState } from "react";
-import "../css/ContactUs.css";
+import { useState } from "react";
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  TextField,
+  Grid,
+  Box,
+  Typography,
+  Container,
+} from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Mail } from "@mui/icons-material";
+import emailjs from "@emailjs/browser";
 import NavBar from "../components/NavBar";
-const ContactUs = () => {
-  const [formData, setFormData] = useState({
-    name: "",
+import {
+  isNotEmpty,
+  validateEmail,
+  numberCheck,
+  messageHasLength,
+} from "../util/auth";
+
+const theme = createTheme();
+
+const ContactForm = () => {
+  const [form, setForm] = useState({
+    fname: "",
     email: "",
+    telephone: "",
+    city: "",
     message: "",
   });
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [stateMessage, setStateMessage] = useState(null);
 
-  // Handle form input change
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(""); // Clear error when typing
+  const validate = () => {
+    let temp = {};
+    temp.fname = isNotEmpty(form.fname) ? "" : "Name is required";
+    temp.email = validateEmail(form.email) ? "" : "Invalid email format";
+    temp.telephone = numberCheck(form.telephone) ? "" : "Invalid mobile number";
+    temp.city = isNotEmpty(form.city) ? "" : "City is required";
+    temp.message = messageHasLength(form.message)
+      ? ""
+      : "Message is required or too short";
+
+    setErrors({ ...temp });
+    return Object.values(temp).every((value) => value === "");
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleOnChange = (event) => {
+    const { name, value } = event.target;
+    setForm({ ...form, [name]: value });
+  };
 
-    const { name, email, message } = formData;
-    if (!name || !email || !message) {
-      setError("All fields are required!");
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    if (!validate()) {
+      setIsSubmitting(false);
       return;
     }
 
-    // Simulating form submission
-    setTimeout(() => {
-      setSubmitted(true);
-      setFormData({ name: "", email: "", message: "" }); // Reset form
-    }, 1000);
+    emailjs
+      .sendForm(
+        process.env.REACT_APP_SERVICE_ID,
+        process.env.REACT_APP_TEMPLATE_ID,
+        event.target,
+        process.env.REACT_APP_PUBLIC_KEY
+      )
+      .then(
+        (result) => {
+          setStateMessage("Message sent!");
+          setForm({
+            fname: "",
+            email: "",
+            telephone: "",
+            city: "",
+            message: "",
+          });
+          setTimeout(() => setStateMessage(null), 5000);
+        },
+        (error) => {
+          setStateMessage("Something went wrong, please try again later.");
+          setTimeout(() => setStateMessage(null), 5000);
+        }
+      )
+      .finally(() => setIsSubmitting(false));
   };
 
   return (
-    <div>
+    <ThemeProvider theme={theme}>
       <NavBar />
-      <div className="contact-container">
-        <h2>Contact Us</h2>
-
-        {/* Success Message */}
-        {submitted && <p className="success">Your message has been sent!</p>}
-
-        {/* Error Message */}
-        {error && <p className="error">{error}</p>}
-
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          <textarea
-            name="message"
-            placeholder="Your Message"
-            rows="4"
-            value={formData.message}
-            onChange={handleChange}
-            required
-          ></textarea>
-          <button type="submit">Send Message</button>
-        </form>
-
-        {/* Contact Info */}
-        <div className="contact-info">
-          <p>
-            <strong>Address:</strong> 123 Street, City, Country
-          </p>
-          <p>
-            <strong>Email:</strong> contact@yourcompany.com
-          </p>
-          <p>
-            <strong>Phone:</strong> +1 234 567 890
-          </p>
-        </div>
-      </div>
-    </div>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+            <Mail />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Contact Form
+          </Typography>
+          <Box
+            component="form"
+            noValidate
+            onSubmit={handleSubmit}
+            sx={{ mt: 3 }}
+          >
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  error={!!errors.fname}
+                  helperText={errors.fname}
+                  name="fname"
+                  required
+                  fullWidth
+                  label="Full Name"
+                  value={form.fname}
+                  onChange={handleOnChange}
+                  disabled={isSubmitting}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  name="email"
+                  required
+                  fullWidth
+                  label="Email Address"
+                  value={form.email}
+                  onChange={handleOnChange}
+                  disabled={isSubmitting}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  error={!!errors.telephone}
+                  helperText={errors.telephone}
+                  name="telephone"
+                  required
+                  fullWidth
+                  label="Mobile Number"
+                  value={form.telephone}
+                  onChange={handleOnChange}
+                  disabled={isSubmitting}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  error={!!errors.city}
+                  helperText={errors.city}
+                  name="city"
+                  required
+                  fullWidth
+                  label="City"
+                  value={form.city}
+                  onChange={handleOnChange}
+                  disabled={isSubmitting}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  error={!!errors.message}
+                  helperText={errors.message}
+                  name="message"
+                  required
+                  fullWidth
+                  multiline
+                  rows={8}
+                  label="Message"
+                  value={form.message}
+                  onChange={handleOnChange}
+                  disabled={isSubmitting}
+                />
+              </Grid>
+            </Grid>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Sending..." : "Submit"}
+            </Button>
+            {stateMessage && (
+              <Typography color="error" sx={{ mt: 2 }}>
+                {stateMessage}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 };
 
-export default ContactUs;
+export default ContactForm;

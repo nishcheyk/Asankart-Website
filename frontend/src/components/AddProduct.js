@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Grid, Paper, TextField, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../css/AddProduct.css"; // Import CSS
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -43,19 +42,41 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="add-product-container">
-      <Paper elevation={3} className="add-product-paper">
-        <Typography variant="h5" className="add-product-title">
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        backgroundColor: "#f5f5f5",
+        padding: "20px",
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          width: "600px",
+          padding: "30px",
+          background: "#ffffff",
+          borderRadius: "10px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{ textAlign: "center", fontWeight: "bold", color: "#333", mb: 2 }}
+        >
           Add Product
         </Typography>
 
-        <Grid container spacing={3} className="add-product-grid">
+        <Grid container spacing={2}>
           {/* Left Column */}
           <Grid item xs={12} sm={6}>
             <TextField
               label="Title"
               variant="outlined"
-              className="add-product-textfield"
+              fullWidth
+              margin="normal"
               value={productData.title}
               name="title"
               onChange={handleInputChanges}
@@ -63,7 +84,8 @@ const AddProduct = () => {
             <TextField
               label="Brand"
               variant="outlined"
-              className="add-product-textfield"
+              fullWidth
+              margin="normal"
               value={productData.brand}
               name="brand"
               onChange={handleInputChanges}
@@ -71,7 +93,8 @@ const AddProduct = () => {
             <TextField
               label="Category"
               variant="outlined"
-              className="add-product-textfield"
+              fullWidth
+              margin="normal"
               value={productData.category}
               name="category"
               onChange={handleInputChanges}
@@ -79,7 +102,8 @@ const AddProduct = () => {
             <TextField
               label="Description"
               variant="outlined"
-              className="add-product-textfield"
+              fullWidth
+              margin="normal"
               value={productData.description}
               name="description"
               onChange={handleInputChanges}
@@ -87,7 +111,8 @@ const AddProduct = () => {
             <TextField
               label="Discount Percentage"
               variant="outlined"
-              className="add-product-textfield"
+              fullWidth
+              margin="normal"
               type="number"
               value={productData.discountPercentage}
               name="discountPercentage"
@@ -97,13 +122,66 @@ const AddProduct = () => {
 
           {/* Right Column */}
           <Grid item xs={12} sm={6}>
-            <div className="add-product-image-section">
-              {productData.images.map((img, index) => (
+            <div>
+              <TextField
+                label="Price"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                type="number"
+                value={productData.price}
+                name="price"
+                onChange={handleInputChanges}
+              />
+              <TextField
+                label="Rating"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                type="number"
+                value={productData.rating}
+                name="rating"
+                onChange={handleInputChanges}
+              />
+              <TextField
+                label="Stock"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                type="number"
+                value={productData.stock}
+                name="stock"
+                onChange={handleInputChanges}
+              />
+              <TextField
+                label="Thumbnail"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={productData.thumbnail}
+                name="thumbnail"
+                onChange={handleInputChanges}
+              />
+            </div>
+          </Grid>
+
+          <Grid item xs={12}>
+            {productData.images.map((img, index) => (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: "70%",
+                  gap: "10px",
+                  marginBottom: "10px",
+                }}
+              >
                 <TextField
-                  key={index}
                   label={`Image ${index + 1}`}
                   variant="outlined"
-                  className="add-product-textfield"
+                  fullWidth
+                  margin="normal"s
                   value={img}
                   onChange={(e) => {
                     const newImages = [...productData.images];
@@ -111,65 +189,49 @@ const AddProduct = () => {
                     setProductData({ ...productData, images: newImages });
                   }}
                 />
-              ))}
-              <Button
-                className="add-product-btn"
-                onClick={() =>
-                  setProductData({
-                    ...productData,
-                    images: [...productData.images, ""],
-                  })
-                }
-              >
-                Add Another Image
-              </Button>
-            </div>
 
-            <TextField
-              label="Price"
-              variant="outlined"
-              className="add-product-textfield"
-              type="number"
-              value={productData.price}
-              name="price"
-              onChange={handleInputChanges}
-            />
-            <TextField
-              label="Rating"
-              variant="outlined"
-              className="add-product-textfield"
-              type="number"
-              value={productData.rating}
-              name="rating"
-              onChange={handleInputChanges}
-            />
-            <TextField
-              label="Stock"
-              variant="outlined"
-              className="add-product-textfield"
-              type="number"
-              value={productData.stock}
-              name="stock"
-              onChange={handleInputChanges}
-            />
-            <TextField
-              label="Thumbnail"
-              variant="outlined"
-              className="add-product-textfield"
-              value={productData.thumbnail}
-              name="thumbnail"
-              onChange={handleInputChanges}
-            />
+                {/* Add Image button only next to the first input field */}
+                {index === 0 && (
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#1976d2",
+                      color: "white",
+                      fontWeight: "bold",
+                      whiteSpace: "nowrap",
+                      "&:hover": { backgroundColor: "#1565c0" },
+                    }}
+                    onClick={() =>
+                      setProductData({
+                        ...productData,
+                        images: [...productData.images, ""],
+                      })
+                    }
+                  >
+                    Add Image
+                  </Button>
+                )}
+              </div>
+            ))}
           </Grid>
-        </Grid>
 
-        <Button
-          variant="contained"
-          className="add-product-save-btn"
-          onClick={handleSave}
-        >
-          Save Product
-        </Button>
+          <Button
+            variant="contained"
+            sx={{
+              marginTop: "20px",
+              width: "100%",
+              backgroundColor: "#28a745",
+              color: "white",
+              padding: "12px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              "&:hover": { backgroundColor: "#218838" },
+            }}
+            onClick={handleSave}
+          >
+            Save Product
+          </Button>
+        </Grid>
       </Paper>
     </div>
   );

@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { Product } = require("../Models/products");
+const Product = require("../Models/products");
 const { Order } = require("../Models/orders");
 const router = express.Router();
 
@@ -83,18 +83,20 @@ router.post("/purchase", async (req, res) => {
     for (const item of items) {
       const product = await Product.findById(item.productId);
       if (!product || product.stock < item.quantity) {
-        return res.status(400).send(`Product ${item.productId} is out of stock`);
+        return res
+          .status(400)
+          .send(`Product ${item.productId} is out of stock`);
       }
       productsToUpdate.push({
         id: item.productId,
-        quantity: item.quantity
+        quantity: item.quantity,
       });
     }
 
     // Update product stock and create order
     const promises = productsToUpdate.map(async (product) => {
       await Product.findByIdAndUpdate(product.id, {
-        $inc: { stock: -product.quantity }
+        $inc: { stock: -product.quantity },
       });
     });
     await Promise.all(promises);

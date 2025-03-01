@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import logo from "../img/logo_2.png";
+import SearchComponent from "../filterComponents/SearchComponent";
 import { AuthContext } from "../context/authContext";
 import "../css/navBar.css";
 
@@ -35,37 +36,61 @@ const NavBar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-menu">
-        <button className="navbar-button" onClick={() => goTo("/about")}>About Us</button>
-        <button className="navbar-button" onClick={() => goTo("/contact")}>Contact Us</button>
-        <button className="navbar-button" onClick={() => goTo("/customer-service")}>
+        <button className="navbar-button" onClick={() => goTo("/about")}>
+          About Us
+        </button>
+        <button className="navbar-button" onClick={() => goTo("/contact")}>
+          Contact Us
+        </button>
+        <button
+          className="navbar-button"
+          onClick={() => goTo("/customer-service")}
+        >
           Customer Service
         </button>
       </div>
 
-      <button className="navbar-logo-btn" onClick={() => goTo("/")}> <img className="navbar-logo" src={logo} alt="Logo" /></button>
+      <button className="navbar-logo-btn" onClick={() => goTo("/")}>
+        {" "}
+        <img className="navbar-logo" src={logo} alt="Logo" />
+      </button>
 
       <div className="navbar-items">
-        {!isAdmin && (
-          <button className="navbar-cart" onClick={() => goTo("/cart")}>🛒
-            {items.length > 0 && <span className="cart-count">{items.length}</span>}
+        {isAdmin && token ? (
+          <button className="navbar-button" onClick={() => goTo("/addProduct")}>
+            +Add Product
+          </button>
+        ) : (
+          <button className="navbar-cart" onClick={() => goTo("/cart")}>
+            🛒
+            {items.length > 0 && (
+              <span className="cart-count">{items.length}</span>
+            )}
           </button>
         )}
 
         {token ? (
           <div className="dropdown-container">
-            <button className="navbar-button" onClick={() => setShowDropdown(!showDropdown)}>
+            <button
+              className="navbar-button"
+              onClick={() => setShowDropdown(!showDropdown)}
+            >
               Account ▼
             </button>
             {showDropdown && (
               <div className="dropdown-menu">
                 <button className="dropdown-item">Public profile</button>
                 <button className="dropdown-item">Settings</button>
-                <button className="dropdown-item" onClick={logOut}>Log Out</button>
+                <button className="dropdown-item" onClick={logOut}>
+                  Log Out
+                </button>
               </div>
             )}
           </div>
         ) : (
-          <button className="navbar-button" onClick={() => goTo("/login")}>Login</button>
+          <button className="navbar-button" onClick={() => goTo("/login")}>
+            Login
+          </button>
         )}
       </div>
     </nav>

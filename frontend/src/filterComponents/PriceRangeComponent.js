@@ -32,7 +32,20 @@ const PriceRangeComponent = (props) => {
       </Stack>
 
       <Slider
-        sx={{ m: 1, width: 210 }}
+        sx={{
+          m: 1,
+          width: 200, // Adjust width if needed
+          color: "primary", // Changes the color if using the theme's primary color
+          "& .MuiSlider-thumb": {
+            backgroundColor: "#474e93", // Change thumb color
+          },
+          "& .MuiSlider-track": {
+            backgroundColor: "black", // Change track color
+          },
+          "& .MuiSlider-rail": {
+            backgroundColor: "#bdbdbd", // Change rail color
+          },
+        }}
         min={props.minPrice}
         max={props.maxPrice}
         value={props.priceRange}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Grid, Paper, TextField, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../css/AddProduct.css"; // Import CSS
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ const AddProduct = () => {
     category: "",
     description: "",
     discountPercentage: "",
-    images: "",
+    images: [""],
     price: "",
     rating: "",
     stock: "",
@@ -20,16 +21,19 @@ const AddProduct = () => {
 
   const handleInputChanges = (event) => {
     const { name, value } = event.target;
-
-    setProductData({ ...productData, [name]: value });
+    setProductData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleSave = async () => {
     console.log(productData);
     try {
-      const response = await axios.post("http://localhost:5000/product/create", {
-        data: productData,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/product/create",
+        { data: productData }
+      );
       if (response.data === "Product saved to the database!") {
         navigate("/");
       }
@@ -39,187 +43,135 @@ const AddProduct = () => {
   };
 
   return (
-    <React.Fragment>
-      <Grid
-        container
-        alignContent="center"
-        justifyContent="center"
-        style={{ paddingTop: "50px" }}
-      >
-        <Paper
-          elevation={3}
-          style={{
-            width: 550,
-          }}
-        >
-          <Grid
-            //sx={gridStyle}
-            container
-            direction="column"
-            alignItems="center"
-            gap={3}
-          >
-            <br />
-            <Grid item>
-              <Typography variant="h5">Add product</Typography>
-            </Grid>
+    <div className="add-product-container">
+      <Paper elevation={3} className="add-product-paper">
+        <Typography variant="h5" className="add-product-title">
+          Add Product
+        </Typography>
 
-            <Grid item>
-              <Grid container direction="row" gap={3}>
-                <Grid item>
-                  <Grid container direction="column" gap={2}>
-                    <Grid item>
-                      <TextField
-                        label="Title"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        value={productData.title}
-                        name="title"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        label="Brand"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        value={productData.brand}
-                        name="brand"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        label="Category"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        value={productData.category}
-                        name="category"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        label="Description"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        value={productData.description}
-                        name="description"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        label="Discount Percentage"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        type="number"
-                        value={productData.discountPercentage}
-                        name="discountPercentage"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-
-                <Grid item>
-                  <Grid container direction="column" gap={2}>
-                    <Grid item>
-                      <TextField
-                        label="Image link"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        value={productData.images}
-                        name="images"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        label="Price"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        type="number"
-                        value={productData.price}
-                        name="price"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        label="Rating"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        type="number"
-                        value={productData.rating}
-                        name="rating"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        label="Stock"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        type="number"
-                        value={productData.stock}
-                        name="stock"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        label="Thumbnail"
-                        variant="outlined"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                        value={productData.thumbnail}
-                        name="thumbnail"
-                        onChange={handleInputChanges}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-
-            <Grid item>
-              <Button variant="contained" color="primary" onClick={handleSave}>
-                Save
-              </Button>
-            </Grid>
-            <Grid item></Grid>
+        <Grid container spacing={3} className="add-product-grid">
+          {/* Left Column */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Title"
+              variant="outlined"
+              className="add-product-textfield"
+              value={productData.title}
+              name="title"
+              onChange={handleInputChanges}
+            />
+            <TextField
+              label="Brand"
+              variant="outlined"
+              className="add-product-textfield"
+              value={productData.brand}
+              name="brand"
+              onChange={handleInputChanges}
+            />
+            <TextField
+              label="Category"
+              variant="outlined"
+              className="add-product-textfield"
+              value={productData.category}
+              name="category"
+              onChange={handleInputChanges}
+            />
+            <TextField
+              label="Description"
+              variant="outlined"
+              className="add-product-textfield"
+              value={productData.description}
+              name="description"
+              onChange={handleInputChanges}
+            />
+            <TextField
+              label="Discount Percentage"
+              variant="outlined"
+              className="add-product-textfield"
+              type="number"
+              value={productData.discountPercentage}
+              name="discountPercentage"
+              onChange={handleInputChanges}
+            />
           </Grid>
-        </Paper>
-      </Grid>
-    </React.Fragment>
+
+          {/* Right Column */}
+          <Grid item xs={12} sm={6}>
+            <div className="add-product-image-section">
+              {productData.images.map((img, index) => (
+                <TextField
+                  key={index}
+                  label={`Image ${index + 1}`}
+                  variant="outlined"
+                  className="add-product-textfield"
+                  value={img}
+                  onChange={(e) => {
+                    const newImages = [...productData.images];
+                    newImages[index] = e.target.value;
+                    setProductData({ ...productData, images: newImages });
+                  }}
+                />
+              ))}
+              <Button
+                className="add-product-btn"
+                onClick={() =>
+                  setProductData({
+                    ...productData,
+                    images: [...productData.images, ""],
+                  })
+                }
+              >
+                Add Another Image
+              </Button>
+            </div>
+
+            <TextField
+              label="Price"
+              variant="outlined"
+              className="add-product-textfield"
+              type="number"
+              value={productData.price}
+              name="price"
+              onChange={handleInputChanges}
+            />
+            <TextField
+              label="Rating"
+              variant="outlined"
+              className="add-product-textfield"
+              type="number"
+              value={productData.rating}
+              name="rating"
+              onChange={handleInputChanges}
+            />
+            <TextField
+              label="Stock"
+              variant="outlined"
+              className="add-product-textfield"
+              type="number"
+              value={productData.stock}
+              name="stock"
+              onChange={handleInputChanges}
+            />
+            <TextField
+              label="Thumbnail"
+              variant="outlined"
+              className="add-product-textfield"
+              value={productData.thumbnail}
+              name="thumbnail"
+              onChange={handleInputChanges}
+            />
+          </Grid>
+        </Grid>
+
+        <Button
+          variant="contained"
+          className="add-product-save-btn"
+          onClick={handleSave}
+        >
+          Save Product
+        </Button>
+      </Paper>
+    </div>
   );
 };
 

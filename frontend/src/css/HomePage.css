@@ -2,7 +2,7 @@
 /* Width of the scrollbar */
 ::-webkit-scrollbar {
   width: 20px; /* Vertical scrollbar */
-  height: 12px; /* Horizontal scrollbar */
+  height: 20px; /* Horizontal scrollbar */
 }
 
 /* Track (background) */

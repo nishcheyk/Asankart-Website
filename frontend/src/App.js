@@ -10,6 +10,7 @@ import { AuthContext } from "./context/authContext";
 import { useState } from "react";
 import AdminPage from "./pages/AdminPage";
 import OrdersPage from "./pages/OrdersPage";
+import ContactUs from "./pages/ContactUs";
 
 function App() {
   const [userLoggedData, setUserLoggedData] = useState({
@@ -47,6 +48,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/contact" element={<ContactUs />} />
         {/* protected views*/}
         <Route
           path="/addProduct"

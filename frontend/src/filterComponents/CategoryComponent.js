@@ -41,7 +41,10 @@ const CategoryComponent = (props) => {
   };
 
   return (
-    <FormControl sx={{ m: 1, minWidth: 220 }} size="small">
+    <FormControl
+      sx={{ m: 1, minWidth: 220, backgroundColor: "white" }}
+      size="small"
+    >
       <InputLabel id="demo-select-small">Categories</InputLabel>
       <Select
         labelId="select-categories"

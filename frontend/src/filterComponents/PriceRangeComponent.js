@@ -8,7 +8,7 @@ const PriceRangeComponent = (props) => {
     <React.Fragment>
       <Stack direction="row" gap={2}>
         <TextField
-          sx={{ m: 1 }}
+          sx={{ m: 1, backgroundColor: "white" }}
           label="min"
           variant="outlined"
           size="small"
@@ -19,7 +19,7 @@ const PriceRangeComponent = (props) => {
           onChange={props.handleMinPrice}
         />
         <TextField
-          sx={{ m: 1 }}
+          sx={{ m: 1, backgroundColor: "white" }}
           label="max"
           variant="outlined"
           size="small"
@@ -34,7 +34,7 @@ const PriceRangeComponent = (props) => {
       <Slider
         sx={{
           m: 1,
-          width: 200, // Adjust width if needed
+          width: "95%", // Adjust width if needed
           color: "primary", // Changes the color if using the theme's primary color
           "& .MuiSlider-thumb": {
             backgroundColor: "#474e93", // Change thumb color

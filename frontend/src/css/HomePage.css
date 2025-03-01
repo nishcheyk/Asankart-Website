@@ -1,41 +1,52 @@
-/* Ensures the main container takes full width and height */
+/* Ensures full width and height usage */
 .homepage-container {
   display: flex;
   flex-direction: column;
-
   width: 100%;
+  align-items: center;
 }
+
 body {
-  background: #7e5cad;
-  min-width: 400px;
+  background: #6850f4;
+  min-width: 300px;
+  width: 100%; /* Fixed from 100vw */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden; /* Fixed horizontal overflow */
 }
 
 /* Full-width NavBar */
 .navbar {
   position: sticky;
+  top: 0;
   background: #493d9e;
-  padding: 15px 0;
+  padding: 15px;
   text-align: center;
   color: white;
   font-size: 18px;
   font-weight: bold;
+  z-index: 1000;
+  width: 100%; /* Fixed from 100vw */
+  box-sizing: border-box;
 }
 
 /* Filters section */
 .filters {
   width: 250px;
   min-height: 300px;
-  max-height: 80vh; /* Prevent filters from forcing page height */
+  max-height: 80%;
   padding: 15px;
-  background: #fff;
-  border-radius: 10px;
+  background: #f0ecec;
+  border-radius: 30px;
   box-shadow: 3px 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: 15px;
-  position: fixed;
+  position: fixed; /* Changed from fixed */
+   margin: 7% 0%; /* Adjusted to prevent overlap */
   left: 20px;
-  top: 120px; /* Adjust for NavBar */
+  overflow: hidden; /* Prevents scrollbars */
 }
 
 /* Button for clearing filters */
@@ -46,6 +57,8 @@ body {
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
+  width: 100%;
+  text-align: center;
 }
 
 .clear-button:hover {
@@ -54,14 +67,16 @@ body {
 
 /* Products section */
 .products {
-  margin-left: 300px; /* Push products to the right */
+  margin-left: max(19%, 280px);
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   justify-content: flex-start;
   padding: 20px;
-  min-width: 400px; /* Prevents product area from squeezing */
-  overflow: hidden; /* Prevents unnecessary scrollbars */
+  min-width: 330px;
+  width: calc(100% - 280px); /* Fixed width */
+  max-width: calc(100% - 280px); /* Prevents overflow */
+  transition: 0.3s;
 }
 
 /* Ensures empty state is centered */
@@ -77,9 +92,9 @@ body {
 /* Pagination section */
 .pagination {
   margin-top: 20px;
-  margin-left: 300px;
   display: flex;
   justify-content: center;
+  width: 100%;
 }
 
 /* RESPONSIVENESS */
@@ -89,12 +104,14 @@ body {
   .filters {
     width: 220px;
     left: 10px;
-    top: 100px;
+    top: 80px;
   }
 
   .products {
     margin-left: 250px;
-    min-width: 500px;
+    width: calc(100% - 270px);
+    min-width: auto;
+    justify-content: center;
   }
 
   .pagination {
@@ -111,14 +128,15 @@ body {
 
   .filters {
     position: relative;
-    width: 100%;
-    left: 0;
     top: 0;
+    margin-top: 2%;
+    width: 70%;
     padding: 10px;
     box-shadow: none;
-    background: transparent;
-    max-height: none; /* Remove height limitation */
-    overflow: visible; /* Ensure it does not scroll */
+    background: white;
+    max-height: 600px;
+    overflow: hidden; /* Ensures no scrollbars */
+    align-items: center;
   }
 
   .clear-button {
@@ -127,12 +145,29 @@ body {
 
   .products {
     margin-left: 0;
+    width: 100%;
+    margin-top: 10%;
     justify-content: center;
-    min-width: auto;
   }
 
   .pagination {
     margin-left: 0;
     justify-content: center;
+  }
+}
+
+/* Extra small screens (phones < 480px) */
+@media (max-width: 480px) {
+  .navbar {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  .filters {
+    display: none; /* Hide filters on very small screens */
+  }
+
+  .products {
+    padding: 10px;
   }
 }

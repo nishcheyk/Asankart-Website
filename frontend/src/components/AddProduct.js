@@ -172,16 +172,17 @@ const AddProduct = () => {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  width: "70%",
+                  width: "100%",
                   gap: "10px",
-                  marginBottom: "10px",
+                  marginBottom: "5px",
                 }}
               >
                 <TextField
                   label={`Image ${index + 1}`}
                   variant="outlined"
                   fullWidth
-                  margin="normal"s
+                  margin="normal"
+                  s
                   value={img}
                   onChange={(e) => {
                     const newImages = [...productData.images];
@@ -220,12 +221,12 @@ const AddProduct = () => {
             sx={{
               marginTop: "20px",
               width: "100%",
-              backgroundColor: "#28a745",
+              backgroundColor: "#474e93",
               color: "white",
               padding: "12px",
               fontSize: "16px",
               fontWeight: "bold",
-              "&:hover": { backgroundColor: "#218838" },
+              "&:hover": { backgroundColor: "rgba(126, 92, 173, 0.7)" },
             }}
             onClick={handleSave}
           >

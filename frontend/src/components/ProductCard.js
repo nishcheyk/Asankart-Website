@@ -86,6 +86,7 @@ const ProductCard = (props) => {
         justifyContent: "space-between",
         height: "80%",
         width: "100%",
+        background: "#DAD2FF",
       }}
     >
       <Card
@@ -123,9 +124,21 @@ const ProductCard = (props) => {
             <Typography variant="h5" component="div">
               {product.title}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                maxHeight: "40px", // Limit the height
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: 3, // Limit to 3 lines
+                WebkitBoxOrient: "vertical",
+              }}
+            >
               {product.description}
             </Typography>
+
             <Stack direction="row" alignItems="center" spacing={1}>
               <Rating
                 name="half-rating-read"

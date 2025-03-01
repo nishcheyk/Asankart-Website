@@ -36,17 +36,20 @@ const NavBar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-menu">
+        <button className="navbar-button" onClick={() => goTo("/")}>
+          <span class="button-content"> Home</span>
+        </button>
         <button className="navbar-button" onClick={() => goTo("/about")}>
-          About Us
+          <span class="button-content">About Us </span>
         </button>
         <button className="navbar-button" onClick={() => goTo("/contact")}>
-          Contact Us
+          <span class="button-content">Contact Us </span>
         </button>
         <button
           className="navbar-button"
           onClick={() => goTo("/customer-service")}
         >
-          Customer Service
+          <span class="button-content">Coustomer Service </span>
         </button>
       </div>
 
@@ -58,11 +61,11 @@ const NavBar = () => {
       <div className="navbar-items">
         {isAdmin && token ? (
           <button className="navbar-button" onClick={() => goTo("/addProduct")}>
-            +Add Product
+            <span class="button-content"> +Add Product</span>
           </button>
         ) : (
           <button className="navbar-cart" onClick={() => goTo("/cart")}>
-            🛒
+            <span class="button-content">🛒 </span>
             {items.length > 0 && (
               <span className="cart-count">{items.length}</span>
             )}
@@ -89,7 +92,7 @@ const NavBar = () => {
           </div>
         ) : (
           <button className="navbar-button" onClick={() => goTo("/login")}>
-            Login
+            <span class="button-content">Login </span>
           </button>
         )}
       </div>

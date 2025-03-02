@@ -58,12 +58,12 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ error: "Invalid password" });
+      return res.status(401).json({ message: "Invalid password" });
     }
 
     const token = user.generateAuthToken();

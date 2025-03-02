@@ -1,6 +1,5 @@
 import React from "react";
 import "../css/Error404.css";
-
 function Error404() {
   return (
     <div
@@ -14,7 +13,7 @@ function Error404() {
         top: 0,
         left: 0,
         backgroundColor: "rgba(0, 0, 0, 0.1)", // Optional: light overlay
-        transform: "scale(2.5)",
+        transform: "scale(1.5)",
       }}
     >
       <div className="main_wrapper">
@@ -91,5 +90,4 @@ function Error404() {
     </div>
   );
 }
-
 export default Error404;

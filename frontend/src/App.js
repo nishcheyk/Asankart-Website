@@ -30,7 +30,7 @@ function App() {
     if (token && userId) {
       setUserLoggedData({ token, userId, isAdmin });
     }
-     setLoading(false); // Stop loading after checking
+    setLoading(false); // Stop loading after checking
   }, []);
 
   const login = (token, userId, isAdmin) => {
@@ -85,7 +85,7 @@ function App() {
           path="/admin"
           element={
             <RequiredAuth>
-              <AdminPage />
+              <HomePage />
             </RequiredAuth>
           }
         />

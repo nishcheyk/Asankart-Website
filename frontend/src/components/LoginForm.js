@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
 import axios from "axios";
 import Alert from "@mui/material/Alert";
+import { NearbyErrorSharp } from "@mui/icons-material";
 
 const LoginForm = (props) => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const LoginForm = (props) => {
     email: "",
     password: "",
   });
-  const [error, setError] = useState(null);
+  const [errors, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleInputChange = (event) => {
@@ -32,7 +33,6 @@ const LoginForm = (props) => {
       console.log(response.data);
       if (response) {
         if (Object.keys(props)[0] !== "closeForm") {
-          console.log(response.data);
           authContext.login(
             response.data.token,
             response.data.userId,
@@ -53,20 +53,23 @@ const LoginForm = (props) => {
         }
       }
     } catch (error) {
-      console.error(error.response.data); // Access error message from backend
-      setError(error.response.data.message); // Set the error message
-      setOpenSnackbar(true);
+      console.error(
+        error?.response?.data?.message || "An unexpected error occurred"
+      );
+      setError(error.response.data.error || "Login failed. Please try again.");
+      console.log("yesssssssssssssss", error.response.data.error);
+      setOpenSnackbar(true); // Ensure Snackbar opens
     }
   };
-
   useEffect(() => {
-    if (error) {
+    if (errors) {
       const timeout = setTimeout(() => {
         setError(null);
-      }, 3000); // Remove error message after 3 seconds
+        setOpenSnackbar(false); // Close Snackbar after timeout
+      }, 3000);
       return () => clearTimeout(timeout);
     }
-  }, [error]);
+  }, [errors]);
 
   return (
     <React.Fragment>
@@ -127,8 +130,8 @@ const LoginForm = (props) => {
         autoHideDuration={3000} // Matches error removal timeout
         onClose={handleCloseSnackbar}
       >
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {error}
+        <Alert severity="error" sx={{ width: "600px" }}>
+          {errors}
         </Alert>
       </Snackbar>
     </React.Fragment>

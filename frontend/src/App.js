@@ -8,10 +8,10 @@ import AuthPage from "./pages/AuthPage";
 import CartPage from "./pages/CartPage";
 import { AuthContext } from "./context/authContext";
 import { useState, useEffect } from "react";
-import AdminPage from "./pages/AdminPage";
 import OrdersPage from "./pages/OrdersPage";
 import ContactUs from "./pages/ContactUs";
 import Loader from "./components/Loader"; // Import Loader component
+import Error404 from "./components/Error404";
 
 function App() {
   const [userLoggedData, setUserLoggedData] = useState({
@@ -30,7 +30,7 @@ function App() {
     if (token && userId) {
       setUserLoggedData({ token, userId, isAdmin });
     }
-     setLoading(false); // Stop loading after checking
+    setLoading(false); // Stop loading after checking
   }, []);
 
   const login = (token, userId, isAdmin) => {
@@ -64,6 +64,7 @@ function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="*" element={<Error404 />} />
         {/* Protected routes */}
         <Route
           path="/addProduct"
@@ -85,7 +86,7 @@ function App() {
           path="/admin"
           element={
             <RequiredAuth>
-              <AdminPage />
+              <HomePage />
             </RequiredAuth>
           }
         />
@@ -97,6 +98,7 @@ function App() {
             </RequiredAuth>
           }
         />
+        <Route path="*" element={<Error404 />} />
       </Routes>
     </AuthContext.Provider>
   );

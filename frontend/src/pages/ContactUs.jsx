@@ -12,13 +12,13 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Mail } from "@mui/icons-material";
 import emailjs from "@emailjs/browser";
-import NavBar from "../components/NavBar";
+import NavBar from "../components/NavBar.jsx";
 import {
   isNotEmpty,
   validateEmail,
   numberCheck,
   messageHasLength,
-} from "../util/auth";
+} from "../util/auth.jsx";
 
 const theme = createTheme();
 

@@ -1,7 +1,7 @@
 import React from "react";
 
-import NavBar from "../components/NavBar";
-import AddProduct from "../components/AddProduct";
+import NavBar from "../components/NavBar.jsx";
+import AddProduct from "../components/AddProduct.jsx";
 
 const AddProductPage = () => {
   return (

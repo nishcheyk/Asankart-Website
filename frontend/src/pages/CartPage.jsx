@@ -37,12 +37,12 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 
-import { addToCart, removeFromCart } from "../store/cart/cartActions";
+import { addToCart, removeFromCart } from "../store/cart/cartActions.jsx";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 
-import LoginForm from "../components/LoginForm";
-import RegisterForm from "../components/RegisterForm";
+import LoginForm from "../components/LoginForm.jsx";
+import RegisterForm from "../components/RegisterForm.jsx";
 
 const CartPage = () => {
   const navigate = useNavigate();

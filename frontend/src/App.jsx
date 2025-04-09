@@ -12,6 +12,7 @@ import OrdersPage from "./pages/OrdersPage.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import Loader from "./components/Loader.jsx";
 import Error404 from "./components/Error404.jsx";
+import Aboutus from "./pages/Aboutus.jsx";
 
 function App() {
   const [userLoggedData, setUserLoggedData] = useState({
@@ -63,6 +64,7 @@ function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/about" element={<Aboutus />} />
         <Route path="*" element={<Error404 />} />
 
         {/* Protected routes */}

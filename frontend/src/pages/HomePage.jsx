@@ -11,7 +11,7 @@ import CategoryComponent from "../filterComponents/CategoryComponent";
 import PriceRangeComponent from "../filterComponents/PriceRangeComponent";
 import BrandListComponent from "../filterComponents/BrandListComponent";
 import Loader from "../components/Loader";
-
+import OtpInput from "../components/OtpInput.jsx";
 const pageSize = 10;
 
 const HomePage = () => {
@@ -174,6 +174,8 @@ const HomePage = () => {
 
   return (
     <div className="homepage-container">
+    <OtpInput/>
+
       <NavBar />
       <div className="filters">
         <button className="clear-button" onClick={handleClearFilters}>

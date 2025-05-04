@@ -1,28 +1,8 @@
 import React, { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import axios from "axios";
-import {
-  Typography,
-  Grid,
-  Stack,
-  Divider,
-  Chip,
-  Paper,
-  Button,
-  Snackbar, // Added Snackbar component
-} from "@mui/material";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Tooltip from "@mui/material/Tooltip";
+import '../css/Order.css';
+
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
@@ -70,157 +50,86 @@ const OrdersPage = () => {
   };
 
   return (
-    <React.Fragment>
+    <div className="orders-page">
       <NavBar />
-      <Grid
-        container
-        alignContent="center"
-        alignItems="center"
-        justifyContent="space-around"
-        sx={{ paddingTop: 2 }}
-      >
-        <Typography variant="h3">Order history</Typography>
-        <Stack direction="row" gap={2}>
-          <Tooltip title="Ascending">
-            <Button
-              variant="contained"
-              onClick={sortByDateASC}
-              startIcon={<FilterListIcon />}
-              endIcon={<ExpandLessIcon />}
-            >
-              Date
-            </Button>
-          </Tooltip>
-          <Tooltip title="Descending">
-            <Button
-              variant="contained"
-              onClick={sortByDateDESC}
-              startIcon={<FilterListIcon />}
-              endIcon={<ExpandMoreIcon />}
-            >
-              Date
-            </Button>
-          </Tooltip>
-        </Stack>
-      </Grid>
-      <Grid
-        container
-        direction="row"
-        justifyContent="center"
-        alignContent="center"
-        alignItems="center"
-        gap={2}
-        sx={{ paddingTop: 5 }}
-      >
-        {error && ( // Display Snackbar for error message
-          <Snackbar
-            open={snackbarOpen}
-            autoHideDuration={6000}
-            onClose={handleSnackbarClose}
-            message={error}
-          />
-        )}
-        {orders !== undefined &&
-          orders.map((Orderitem) => (
-            <Grid item key={Orderitem._id}>
-              <Card key={Orderitem._id} sx={{ height: 400 }}>
-                <CardContent>
-                  <Stack direction="row" justifyContent="space-between">
-                    <div>
-                      <Typography
-                        sx={{ fontSize: 14 }}
-                        color="text.secondary"
-                        gutterBottom
-                      >
-                        Order number:
-                      </Typography>
-                      <Typography sx={{ fontSize: 14 }} color="text.primary">
-                        {Orderitem._id}
-                      </Typography>
-                    </div>
-                    <div>
-                      <Typography sx={{ fontSize: 14 }} color="text.primary">
-                        {Orderitem.createdDate}
-                      </Typography>
-                    </div>
-                  </Stack>
-                  <Chip label="Processing..." />
-                  <Grid
-                    container
-                    direction="row"
-                    justifyContent="center"
-                    alignContent="center"
-                    alignItems="center"
-                    gap={2}
-                    paddingTop={2}
-                  >
-                    <Grid item>
-                      <TableContainer
-                        component={Paper}
-                        sx={{
-                          overflow: "scroll",
-                          overflowX: "hidden",
-                          maxHeight: 300,
-                        }}
-                      >
-                        <Table sx={{ width: 300 }} aria-label="simple table">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Product</TableCell>
-                              <TableCell>Price</TableCell>
-                              <TableCell>Quantity</TableCell>
-                              <TableCell>Total</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {JSON.parse(Orderitem.items).map((item) => (
-                              <TableRow
-                                key={item._id}
-                                sx={{
-                                  "&:last-child td, &:last-child th": {
-                                    border: 0,
-                                  },
-                                }}
-                              >
-                                <TableCell component="th" scope="row">
-                                  {item.title}
-                                </TableCell>
-                                <TableCell>₹{item.price}</TableCell>
-                                <TableCell>{item.quantity}</TableCell>
-                                <TableCell>{Orderitem.totalAmount}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Grid>
-                    <Divider
-                      orientation="vertical"
-                      flexItem
-                      sx={{ borderRightWidth: 5 }}
-                    />
-                    <br />
-                    <Grid item>
-                      <Stack direction="column" gap={1}>
-                        <Typography variant="h6">Order details:</Typography>
-                        <Divider />
-                        <Typography>
-                          {Orderitem.firstName} {Orderitem.lastName}
-                        </Typography>
-                        <Typography variant="h6">Shipping:</Typography>
-                        <Divider />
-                        <Typography>{Orderitem.address}</Typography>
-                        <Typography>{Orderitem.zipCode}</Typography>
-                        <Typography>{Orderitem.country}</Typography>
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
+      <div className="header">
+        <h1>Order history</h1>
+        <div className="sort-buttons">
+          <button onClick={sortByDateASC} className="sort-button">
+            Date (Ascending)
+          </button>
+          <button onClick={sortByDateDESC} className="sort-button">
+            Date (Descending)
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="error-snackbar">
+          <span>{error}</span>
+          <button onClick={handleSnackbarClose}>Close</button>
+        </div>
+      )}
+
+      <div className="orders-container">
+        {orders &&
+          orders.map((order) => (
+            <div key={order._id} className="order-card">
+              <div className="order-header">
+                <div>
+                  <h4>Order number: {order._id}</h4>
+                  <p>{order.createdDate}</p>
+                </div>
+                <span className="chip">Processing...</span>
+              </div>
+
+              <div className="order-details">
+                <div className="order-items">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.isArray(order.items)
+                        ? order.items.map((item) => (
+                            <tr key={item._id}>
+                              <td>{item.title}</td>
+                              <td>₹{item.price}</td>
+                              <td>{item.quantity}</td>
+                              <td>{order.totalAmount}</td>
+                            </tr>
+                          ))
+                        : JSON.parse(order.items).map((item) => (
+                            <tr key={item._id}>
+                              <td>{item.title}</td>
+                              <td>₹{item.price}</td>
+                              <td>{item.quantity}</td>
+                              <td>{order.totalAmount}</td>
+                            </tr>
+                          ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="order-shipping">
+                  <h5>Order details:</h5>
+                  <p>{order.firstName} {order.lastName}</p>
+
+                  <h5>Shipping:</h5>
+                  <p>{order.address}</p>
+                  <p>{order.zipCode}</p>
+                  <p>{order.country}</p>
+                </div>
+              </div>
+            </div>
           ))}
-      </Grid>
-    </React.Fragment>
+      </div>
+    </div>
   );
 };
 

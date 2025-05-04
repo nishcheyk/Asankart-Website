@@ -20,6 +20,8 @@ app.use(isAuth);
 app.use("/product", product);
 app.use("/users", user);
 app.use("/order", order);
+app.use("/chat", require("./Routes/chat"));
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

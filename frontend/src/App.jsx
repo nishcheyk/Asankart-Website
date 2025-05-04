@@ -13,6 +13,7 @@ import ContactUs from "./pages/ContactUs.jsx";
 import Loader from "./components/Loader.jsx";
 import Error404 from "./components/Error404.jsx";
 import Aboutus from "./pages/Aboutus.jsx";
+import Coustmerserivce from "./pages/Coustomerchat.jsx";
 
 function App() {
   const [userLoggedData, setUserLoggedData] = useState({
@@ -65,6 +66,8 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/about" element={<Aboutus />} />
+        <Route path="/customer-service" element={<Coustmerserivce />} />
+        <Route path="/order" element={<OrdersPage />} />
         <Route path="*" element={<Error404 />} />
 
         {/* Protected routes */}

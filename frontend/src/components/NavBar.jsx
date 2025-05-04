@@ -49,7 +49,7 @@ const NavBar = () => {
           className="navbar-button"
           onClick={() => goTo("/customer-service")}
         >
-          <span class="button-content">Coustomer Service </span>
+          <span class="button-content">Customer Service </span>
         </button>
       </div>
 
@@ -84,6 +84,9 @@ const NavBar = () => {
               <div className="dropdown-menu">
                 <button className="dropdown-item">Public profile</button>
                 <button className="dropdown-item">Settings</button>
+                <button className="dropdown-item" onClick={() => goTo("/order")}>My Orders</button>
+
+
                 <button className="dropdown-item" onClick={logOut}>
                   Log Out
                 </button>

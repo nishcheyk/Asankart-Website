@@ -41,8 +41,8 @@ import { addToCart, removeFromCart } from "../store/cart/cartActions.jsx";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 
-import LoginForm from "../components/LoginForm.jsx";
-import RegisterForm from "../components/RegisterForm.jsx";
+import LoginForm from "../pages/AuthPage.jsx";
+import RegisterForm from "../pages/AuthPage.jsx";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -140,9 +140,9 @@ const CartPage = () => {
         data: order,
       });
       console.log(response.data);
-      if (response.data === "Order saved to the database!") {
+      if (response.data.message === "Order saved to the database") {
         setConfirmShow(false);
-        navigate("/orders");
+        navigate("/order");
       }
     } catch (e) {
       console.log(e);

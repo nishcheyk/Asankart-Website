@@ -20,7 +20,7 @@ router.get("/:id", async (req, res) => {
 router.post("/register", async (req, res) => {
   try {
     console.log(req.body);
-    const { username, email, password, isAdmin } = req.body.data;
+    const { username, email, password, isAdmin } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -54,7 +54,7 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body.data;
+    const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {

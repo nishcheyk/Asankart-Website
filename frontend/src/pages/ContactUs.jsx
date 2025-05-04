@@ -8,6 +8,7 @@ import {
   Box,
   Typography,
   Container,
+  CircularProgress,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Mail } from "@mui/icons-material";
@@ -30,31 +31,37 @@ const ContactForm = () => {
     city: "",
     message: "",
   });
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stateMessage, setStateMessage] = useState(null);
 
+  // 🔍 Form Validation
   const validate = () => {
     let temp = {};
     temp.fname = isNotEmpty(form.fname) ? "" : "Name is required";
     temp.email = validateEmail(form.email) ? "" : "Invalid email format";
-    temp.telephone = numberCheck(form.telephone) ? "" : "Invalid mobile number";
+    temp.telephone = numberCheck(form.telephone)
+      ? ""
+      : "Invalid mobile number";
     temp.city = isNotEmpty(form.city) ? "" : "City is required";
     temp.message = messageHasLength(form.message)
       ? ""
       : "Message is required or too short";
 
     setErrors({ ...temp });
-    return Object.values(temp).every((value) => value === "");
+    return Object.values(temp).every((val) => val === "");
   };
 
-  const handleOnChange = (event) => {
-    const { name, value } = event.target;
-    setForm({ ...form, [name]: value });
+  // 🔄 Handle Field Changes
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  // 🚀 Submit Handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setIsSubmitting(true);
 
     if (!validate()) {
@@ -62,31 +69,30 @@ const ContactForm = () => {
       return;
     }
 
-    emailjs
-      .sendForm(
+    try {
+      const result = await emailjs.sendForm(
         process.env.REACT_APP_SERVICE_ID,
         process.env.REACT_APP_TEMPLATE_ID,
-        event.target,
+        e.target,
         process.env.REACT_APP_PUBLIC_KEY
-      )
-      .then(
-        (result) => {
-          setStateMessage("Message sent!");
-          setForm({
-            fname: "",
-            email: "",
-            telephone: "",
-            city: "",
-            message: "",
-          });
-          setTimeout(() => setStateMessage(null), 5000);
-        },
-        (error) => {
-          setStateMessage("Something went wrong, please try again later.");
-          setTimeout(() => setStateMessage(null), 5000);
-        }
-      )
-      .finally(() => setIsSubmitting(false));
+      );
+
+      console.log("Email sent:", result);
+      setStateMessage("Message sent successfully!");
+      setForm({
+        fname: "",
+        email: "",
+        telephone: "",
+        city: "",
+        message: "",
+      });
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      setStateMessage("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setStateMessage(null), 5000);
+    }
   };
 
   return (
@@ -116,8 +122,6 @@ const ContactForm = () => {
           >
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-
-
                 <TextField
                   error={!!errors.fname}
                   helperText={errors.fname}
@@ -177,7 +181,7 @@ const ContactForm = () => {
                   required
                   fullWidth
                   multiline
-                  rows={8}
+                  rows={6}
                   label="Message"
                   value={form.message}
                   onChange={handleOnChange}
@@ -185,17 +189,19 @@ const ContactForm = () => {
                 />
               </Grid>
             </Grid>
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ mt: 3, mb: 2, height: 45 }}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Sending..." : "Submit"}
+              {isSubmitting ? <CircularProgress size={24} color="inherit" /> : "Submit"}
             </Button>
+
             {stateMessage && (
-              <Typography color="error" sx={{ mt: 2 }}>
+              <Typography color="error" sx={{ mt: 2, textAlign: "center" }}>
                 {stateMessage}
               </Typography>
             )}

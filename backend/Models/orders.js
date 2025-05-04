@@ -9,10 +9,24 @@ const orderSchema = new mongoose.Schema({
   country: { type: String, required: true },
   zipCode: { type: String, required: true },
   totalAmount: { type: String, required: true },
-  items: { type: String, required: true },
+  items: [
+    {
+      _id: mongoose.Schema.Types.ObjectId,
+      title: String,
+      description: String,
+      price: Number,
+      discountPercentage: Number,
+      rating: Number,
+      stock: Number,
+      brand: String,
+      category: String,
+      thumbnail: String,
+      images: [String],
+      quantity: Number
+    }
+  ],
   createdDate: { type: Date, required: true },
 });
 
 const Order = mongoose.model("Order", orderSchema);
-
 exports.Order = Order;

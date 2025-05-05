@@ -37,7 +37,7 @@ Once you have cloned the repository, you will need to install the required npm p
 - Install the necessary packages:
   - npm install
 - Start the development server:
-  - npm start
+  - npm run dev
 
 ## Backend:
 - Go to the "backend" directory:

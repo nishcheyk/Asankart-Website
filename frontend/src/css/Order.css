@@ -1,121 +1,169 @@
-/* Main container */
 .orders-page {
-    font-family: Arial, sans-serif;
-    padding: 20px;
+  font-family: "Segoe UI", sans-serif;
+  padding: 1rem;
+  background:#6850f4;
+  min-height: 100vh;
+}
+.head{
+  color: white;
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.sort-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sort-button {
+  background-color: #5e60ce;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.sort-button:hover {
+  background-color: #4b4cc6;
+}
+
+.error-snackbar {
+  background-color: #ffe5e5;
+  color: #b00020;
+  padding: 1rem;
+  border-left: 5px solid #b00020;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error-snackbar button {
+  background: transparent;
+  border: none;
+  color: #b00020;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.order-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chip {
+  background-color: #00b894;
+  color: white;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.order-details {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.order-items,
+.order-shipping {
+  flex: 1 1 300px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+th, td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+
+h5 {
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .order-details {
+    flex-direction: column;
   }
 
   .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-
-  h1 {
-    font-size: 2rem;
-    margin: 0;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .sort-buttons {
-    display: flex;
-    gap: 10px;
+    margin-top: 0.5rem;
   }
+}
 
-  .sort-button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
+.status-select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+  margin-left: 10px;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
 
-  .sort-button:hover {
-    background-color: #0056b3;
-  }
+.status-select:hover {
+  border-color: #888;
+}
 
-  /* Error Snackbar */
-  .error-snackbar {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .error-snackbar button {
-    background-color: #721c24;
-    color: white;
-    border: none;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 5px;
-  }
-
-  .error-snackbar button:hover {
-    background-color: #f5c6cb;
-  }
-
-  /* Orders List */
-  .orders-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .order-card {
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    border-radius: 5px;
-  }
-
-  .order-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .chip {
-    padding: 5px 10px;
-    background-color: #28a745;
-    color: white;
-    font-size: 14px;
-    border-radius: 20px;
-  }
-
-  .order-details {
-    display: flex;
-    gap: 30px;
-  }
-
-  .order-items {
-    flex: 1;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th, td {
-    padding: 8px;
-    text-align: left;
-    border: 1px solid #ddd;
-  }
-
-  th {
-    background-color: #f4f4f4;
-  }
-
-  .order-shipping {
-    flex: 1;
-    padding-left: 20px;
-  }
-
-  h5 {
-    font-size: 1.2rem;
-    margin-bottom: 5px;
-  }
+.status-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+.status-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}

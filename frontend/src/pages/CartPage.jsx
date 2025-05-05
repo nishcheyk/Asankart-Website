@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState, useContext } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
 import { AuthContext } from "../context/authContext";
 import {
   Grid,
@@ -18,31 +17,30 @@ import {
   Stack,
   Card,
   TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Avatar,
+  InputAdornment,
+  useMediaQuery,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import Avatar from "@mui/material/Avatar";
+import {
+  Add as AddIcon,
+  Remove as RemoveIcon,
+  AccountCircle,
+  Home as HomeIcon,
+  Flag as FlagIcon,
+  LocationCity as LocationCityIcon,
+  MarkunreadMailbox,
+  LocalMall as LocalMallIcon,
+} from "@mui/icons-material";
 import NavBar from "../components/NavBar";
-import InputAdornment from "@mui/material/InputAdornment";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import HomeIcon from "@mui/icons-material/Home";
-import FlagIcon from "@mui/icons-material/Flag";
-import LocationCityIcon from "@mui/icons-material/LocationCity";
-import MarkunreadMailbox from "@mui/icons-material/MarkunreadMailbox";
-import LocalMallIcon from "@mui/icons-material/LocalMall";
-import emptyCart from "../img/emptycart.png";
-
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-
-import { addToCart, removeFromCart } from "../store/cart/cartActions.jsx";
-import { useDispatch } from "react-redux";
+import { addToCart, removeFromCart } from "../store/cart/cartActions";
 import axios from "axios";
-
-import LoginForm from "../pages/AuthPage.jsx";
-import RegisterForm from "../pages/AuthPage.jsx";
+import LoginForm from "../pages/AuthPage";
+import RegisterForm from "../pages/AuthPage";
+import emptyCart from "../img/emptycart.png";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -51,10 +49,12 @@ const CartPage = () => {
   const addedItems = useSelector((state) => state.cartStore.addedItems);
   const total = useSelector((state) => state.cartStore.total);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [open, setOpen] = React.useState(false);
-  const [accountDialog, setAccountDialog] = React.useState(false);
-  const [showLogin, setShowLogin] = React.useState(false);
-  const [confirmShow, setConfirmShow] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [accountDialog, setAccountDialog] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [confirmShow, setConfirmShow] = useState(false);
+  const isMobile = useMediaQuery("(max-width:768px)");
+
   const [checkoutForm, setCheckoutForm] = useState({
     firstName: "",
     lastName: "",
@@ -62,33 +62,39 @@ const CartPage = () => {
     city: "",
     country: "",
     zipCode: "",
+    mobileNumber: "", // Added mobile number
   });
 
   useEffect(() => {
     if (total !== undefined) {
       setTotalAmount(parseFloat(total).toFixed(2));
     }
-  }, [total, addedItems, totalAmount]);
+  }, [total, addedItems]);
 
-  const goBack = () => {
-    navigate("/");
-  };
+  const goBack = () => navigate("/");
 
   const cartItemRemoveHandler = (id) => {
-    console.log(id);
     dispatch(removeFromCart(id));
   };
 
   const cartItemAddHandler = (item) => {
-    console.log(item);
-    const product_item = {
-      product: item,
-      amount: 1,
-    };
+    if (item.quantity >= 5) {
+      alert("Maximum quantity of 5 reached for this item.");
+      return;
+    }
+    const product_item = { product: item, amount: 1 };
     dispatch(addToCart(product_item));
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
+    const { mobileNumber } = checkoutForm;
+    const isValidMobile = /^[0-9]{10}$/.test(mobileNumber);
+
+    if (!isValidMobile) {
+      alert("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
     if (!authContext.token) {
       setOpen(true);
     } else {
@@ -113,7 +119,7 @@ const CartPage = () => {
     setOpen(false);
   };
 
-  const handleCloseAccountDialog = async () => {
+  const handleCloseAccountDialog = () => {
     setAccountDialog(false);
     setConfirmShow(true);
   };
@@ -125,364 +131,250 @@ const CartPage = () => {
   const handleConfirm = async () => {
     const order = {
       userID: localStorage.getItem("userId"),
-      firstName: checkoutForm.firstName,
-      lastName: checkoutForm.lastName,
-      address: checkoutForm.address,
-      city: checkoutForm.city,
-      country: checkoutForm.country,
-      zipCode: checkoutForm.zipCode,
-      totalAmount: totalAmount,
+      ...checkoutForm,
+      totalAmount,
       items: addedItems,
       createdDate: new Date(),
     };
+
     try {
       const response = await axios.post("http://localhost:5000/order/create", {
         data: order,
       });
-      console.log(response.data);
+
       if (response.data.message === "Order saved to the database") {
+        dispatch({ type: "CLEAR_CART" }); // Clear the cart
         setConfirmShow(false);
         navigate("/order");
       }
     } catch (e) {
       console.log(e);
     }
-    console.log(order);
   };
+
   return (
-    <React.Fragment>
+    <>
       <NavBar />
-      {addedItems.length !== 0 ? (
-        <>
-          <Grid
-            container
-            direction="row"
-            alignContent="center"
-            justifyContent="center"
-            sx={{ paddingTop: 5 }}
-          >
-            <Grid item xs={5}>
-              <Paper
-                elevation={3}
-                sx={{
-                  width: 550,
-                }}
-              >
-                <Grid
-                  container
-                  alignContent="center"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <TableContainer
-                    component={Paper}
-                    sx={{
-                      overflow: "scroll",
-                      overflowX: "hidden",
-                      maxHeight: 500,
+
+      {addedItems.length ? (
+        <Grid
+          container
+          spacing={4}
+          direction={isMobile ? "column" : "row"}
+          justifyContent="center"
+          alignItems="flex-start"
+          sx={{ p: 3 }}
+        >
+          {/* Cart Items */}
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} sx={{ width: "100%" }}>
+              <TableContainer sx={{ maxHeight: 500 }}>
+                <Table aria-label="cart table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Product</TableCell>
+                      <TableCell>Price</TableCell>
+                      <TableCell>Amount</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {addedItems.map((item) => (
+                      <TableRow key={item._id}>
+                        <TableCell>
+                          <Stack direction="row" gap={1} alignItems="center">
+                            <Avatar src={item.images} variant="square" />
+                            {item.title}
+                          </Stack>
+                        </TableCell>
+                        <TableCell>₹{item.price}</TableCell>
+                        <TableCell>
+                          <Stack direction="row" gap={2} alignItems="center">
+                            <IconButton onClick={() => cartItemAddHandler(item)}>
+                              <AddIcon />
+                            </IconButton>
+                            <Typography>{item.quantity}</Typography>
+                            <IconButton onClick={() => cartItemRemoveHandler(item._id)}>
+                              <RemoveIcon />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Card sx={{ backgroundColor: "#2196f3", p: 2, mt: 1 }}>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography color="white">Total amount:</Typography>
+                  <Typography color="white">₹{totalAmount}</Typography>
+                </Stack>
+              </Card>
+            </Paper>
+          </Grid>
+
+          {/* Checkout Form */}
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} sx={{ p: 3 }}>
+              <Typography variant="h6" align="center" gutterBottom>
+                Checkout form
+              </Typography>
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="First Name"
+                    name="firstName"
+                    value={checkoutForm.firstName}
+                    onChange={handleFormInput}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AccountCircle />
+                        </InputAdornment>
+                      ),
                     }}
-                  >
-                    <Table sx={{ width: 550 }} aria-label="simple table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Product</TableCell>
-                          <TableCell>Price</TableCell>
-                          <TableCell>Amount</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {addedItems.map((item) => (
-                          <TableRow
-                            key={item._id}
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                            }}
-                          >
-                            <TableCell component="th" scope="row">
-                              <Stack direction="row" gap={1}>
-                                <Avatar src={item.images} variant="square" />
-                                {item.title}
-                              </Stack>
-                            </TableCell>
-                            <TableCell align="right">₹{item.price}</TableCell>
-                            <TableCell align="right">
-                              <Stack
-                                direction="row"
-                                gap={2}
-                                sx={{ alignItems: "center" }}
-                              >
-                                <IconButton
-                                  aria-label="add"
-                                  size="medium"
-                                  onClick={cartItemAddHandler.bind(null, item)}
-                                >
-                                  <AddIcon fontSize="inherit" />
-                                </IconButton>
-                                <Typography variant="h5">
-                                  {item.quantity}
-                                </Typography>
-                                <IconButton
-                                  aria-label="remove"
-                                  size="medium"
-                                  onClick={cartItemRemoveHandler.bind(
-                                    null,
-                                    item._id
-                                  )}
-                                >
-                                  <RemoveIcon fontSize="inherit" />
-                                </IconButton>
-                              </Stack>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                  />
                 </Grid>
-                <br />
-                <Card sx={{ backgroundColor: "#2196f3", maxWidth: 550 }}>
-                  <Stack direction="row" justifyContent="space-around">
-                    <Typography variant="h6" color="whitesmoke">
-                      Total amount:
-                    </Typography>
-                    <Typography variant="h6" color="whitesmoke">
-                      {totalAmount}
-                    </Typography>
-                  </Stack>
-                  <Stack direction="row"></Stack>
-                </Card>
-              </Paper>
-            </Grid>
-            <Grid item xs={5}>
-              <Paper
-                elevation={3}
-                style={{
-                  width: 500,
-                  paddingTop: 5,
-                }}
-              >
-                <Grid
-                  container
-                  direction="column"
-                  alignItems="center"
-                  alignContent="center"
-                  justifyContent="center"
-                  spacing={3}
-                >
-                  <Grid item>
-                    <Typography variant="h5">Checkout form</Typography>
-                  </Grid>
-                  <Grid item>
-                    <Grid
-                      container
-                      direction="row"
-                      alignItems="center"
-                      alignContent="center"
-                      justifyContent="center"
-                      gap={3}
-                    >
-                      <Grid item>
-                        <Grid
-                          container
-                          direction="column"
-                          alignItems="center"
-                          alignContent="center"
-                          justifyContent="center"
-                          gap={5}
-                          //style={{ paddingTop: "20px" }}
-                        >
-                          <Grid item>
-                            <TextField
-                              label="First Name"
-                              type="text"
-                              sx={{ width: 230 }}
-                              name="firstName"
-                              value={checkoutForm.firstName || ""}
-                              onChange={handleFormInput}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <AccountCircle />
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <TextField
-                              label="Last Name"
-                              type="text"
-                              name="lastName"
-                              value={checkoutForm.lastName || ""}
-                              onChange={handleFormInput}
-                              sx={{ width: 230 }}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <AccountCircle />
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <TextField
-                              label="Address"
-                              type="text"
-                              name="address"
-                              value={checkoutForm.address || ""}
-                              onChange={handleFormInput}
-                              sx={{ width: 230 }}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <HomeIcon />
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
-                        </Grid>
-                      </Grid>
-
-                      <Grid item>
-                        <Grid
-                          container
-                          direction="column"
-                          alignItems="center"
-                          alignContent="center"
-                          justifyContent="center"
-                          gap={5}
-                          //style={{ paddingTop: "20px" }}
-                        >
-                          <Grid item>
-                            <TextField
-                              label="City"
-                              type="text"
-                              name="city"
-                              value={checkoutForm.city || ""}
-                              onChange={handleFormInput}
-                              sx={{ width: 230 }}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <LocationCityIcon />
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <TextField
-                              label="Country"
-                              type="text"
-                              name="country"
-                              value={checkoutForm.country || ""}
-                              onChange={handleFormInput}
-                              sx={{ width: 230 }}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <FlagIcon />
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <TextField
-                              label="Zip code"
-                              type="text"
-                              name="zipCode"
-                              value={checkoutForm.zipCode || ""}
-                              onChange={handleFormInput}
-                              sx={{ width: 230 }}
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <MarkunreadMailbox />
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-
-                  <Grid item>
-                    <Button variant="contained" onClick={handleCheckout}>
-                      Checkout
-                    </Button>
-                  </Grid>
-                  <Grid item></Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Last Name"
+                    name="lastName"
+                    value={checkoutForm.lastName}
+                    onChange={handleFormInput}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AccountCircle />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
                 </Grid>
-              </Paper>
-            </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Address"
+                    name="address"
+                    value={checkoutForm.address}
+                    onChange={handleFormInput}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <HomeIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="City"
+                    name="city"
+                    value={checkoutForm.city}
+                    onChange={handleFormInput}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LocationCityIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Country"
+                    name="country"
+                    value={checkoutForm.country}
+                    onChange={handleFormInput}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <FlagIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Zip code"
+                    name="zipCode"
+                    value={checkoutForm.zipCode}
+                    onChange={handleFormInput}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <MarkunreadMailbox />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+
+                {/* Mobile Number Field */}
+                <Grid item xs={12}>
+                  <TextField
+                    label="Mobile Number"
+                    name="mobileNumber"
+                    value={checkoutForm.mobileNumber}
+                    onChange={handleFormInput}
+                    fullWidth
+                    inputProps={{ maxLength: 10 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AccountCircle />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} textAlign="center">
+                  <Button variant="contained" onClick={handleCheckout}>
+                    Checkout
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
           </Grid>
-        </>
+        </Grid>
       ) : (
-        <>
-          <Grid
-            container
-            direction="column"
-            alignItems="center"
-            alignContent="center"
-            justifyContent="center"
-            sx={{ paddingTop: 2 }}
-          >
-            <Grid item>
-              <Button
-                variant="contained"
-                onClick={goBack}
-                endIcon={<LocalMallIcon />}
-              >
-                Back to shop
-              </Button>
-            </Grid>
-            <Grid item>
-              <img src={emptyCart} alt="empty cart" />
-            </Grid>
-          </Grid>
-        </>
+        <Grid
+          container
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          sx={{ pt: 4 }}
+        >
+          <Button variant="contained" onClick={goBack} endIcon={<LocalMallIcon />}>
+            Back to shop
+          </Button>
+          <img src={emptyCart} alt="empty cart" style={{ maxWidth: 300, marginTop: 16 }} />
+        </Grid>
       )}
 
-      <React.Fragment>
-        <Dialog
-          open={open}
-          //onClose={handleClose}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">
-            {"Are you have an account?"}
-          </DialogTitle>
-          <DialogActions>
-            <Button
-              onClick={handleCreateAccount}
-              variant="contained"
-              color="secondary"
-            >
-              Create
-            </Button>
-            <Button
-              onClick={handleGoToLogin}
-              variant="contained"
-              color="primary"
-              autoFocus
-            >
-              Login
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </React.Fragment>
-      <Dialog
-        open={accountDialog}
-        onClose={handleCloseAccountDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
+      {/* Login / Register Prompt */}
+      <Dialog open={open}>
+        <DialogTitle>Do you have an account?</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleCreateAccount} variant="contained" color="secondary">
+            Create
+          </Button>
+          <Button onClick={handleGoToLogin} variant="contained" color="primary" autoFocus>
+            Login
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Auth Dialog */}
+      <Dialog open={accountDialog} onClose={handleCloseAccountDialog}>
         <DialogContent>
           {showLogin ? (
             <LoginForm closeForm={handleCloseAccountDialog} />
@@ -491,32 +383,20 @@ const CartPage = () => {
           )}
         </DialogContent>
       </Dialog>
-      <React.Fragment>
-        <Dialog
-          open={confirmShow}
-          onClose={handleCancel}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">
-            {"Are you confirm the order?"}
-          </DialogTitle>
-          <DialogActions>
-            <Button onClick={handleCancel} variant="contained" color="error">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              variant="contained"
-              color="success"
-              autoFocus
-            >
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </React.Fragment>
-    </React.Fragment>
+
+      {/* Confirm Order Dialog */}
+      <Dialog open={confirmShow} onClose={handleCancel}>
+        <DialogTitle>Confirm your order?</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleCancel} variant="contained" color="error">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm} variant="contained" color="success" autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

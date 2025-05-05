@@ -2,10 +2,11 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const router = express.Router();
-const User = require("../models/User"); // Assuming you have a User model
+const  {User}  = require("../Models/user.js"); // ✅ Correct destructuring from model
 
-let otpStore = {}; // To store OTP temporarily
+let otpStore = {}; // In-memory OTP store (good for dev/testing)
 
+// Setup transporter for nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -14,32 +15,32 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Generate OTP
+// Generate 4-digit OTP
 const generateOtp = () => Math.floor(1000 + Math.random() * 9000).toString();
 
-// Send OTP
+
 router.post("/send-otp-signup", async (req, res) => {
   const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (user) {
-    return res.status(404).send("email there");
-  }
+
   try {
+    const user = await User.findOne({ email });
+    if (user) {
+      return res.status(409).send("Email already exists");
+    }
 
     const otp = generateOtp();
     const hashedOtp = await bcrypt.hash(otp, 10);
-
     otpStore[email] = { hashedOtp, email };
 
     const mailOptions = {
       from: "thaparbankingsolutions@gmail.com",
       to: email,
-      subject: "Your OTP Code",
+      subject: "Your Signup OTP Code",
       text: `Your OTP code is ${otp}`,
     };
-    console.log("started");
+
     await transporter.sendMail(mailOptions);
-    console.log("send");
+    console.log(`[OTP-SIGNUP] OTP sent to ${email}: ${otp}`);
     res.status(200).send("OTP sent successfully");
   } catch (error) {
     console.error("Error sending OTP:", error);
@@ -47,26 +48,25 @@ router.post("/send-otp-signup", async (req, res) => {
   }
 });
 
-// Verify OTP
+
 router.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
   if (!email || !otp) {
     return res.status(400).send("Email and OTP are required");
   }
 
-  console.log(`Verifying OTP for email: ${email}, OTP: ${otp}`);
-
   try {
     const otpData = otpStore[email];
     if (!otpData) {
-      return res.status(400).send("OTP not found for this email");
+      return res.status(404).send("OTP not found for this email");
     }
 
     const isMatch = await bcrypt.compare(otp, otpData.hashedOtp);
     if (isMatch) {
-      res.status(200).send("OTP verified successfully");
+      console.log(`[OTP-VERIFY] OTP verified for ${email}`);
+      return res.status(200).send("OTP verified successfully");
     } else {
-      res.status(400).send("Invalid OTP");
+      return res.status(400).send("Invalid OTP");
     }
   } catch (error) {
     console.error("Error verifying OTP:", error);
@@ -74,10 +74,9 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-// Reset Password
+
 router.post("/reset-password", async (req, res) => {
   const { email, newPassword } = req.body;
-
   if (!email || !newPassword) {
     return res.status(400).send("Email and new password are required");
   }
@@ -85,7 +84,9 @@ router.post("/reset-password", async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await User.updateOne({ email }, { password: hashedPassword });
-    res.status(200).send("Password reset successfully");
+    console.log(`[PASSWORD-RESET] Password reset for ${email}`);
+    return res.status(200).send("Password reset successfully");
+    
   } catch (error) {
     console.error("Error resetting password:", error);
     res.status(500).send("Error resetting password");
@@ -99,7 +100,6 @@ router.post("/send-otp", async (req, res) => {
   }
 
   try {
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).send("User not found");
@@ -107,21 +107,22 @@ router.post("/send-otp", async (req, res) => {
 
     const otp = generateOtp();
     const hashedOtp = await bcrypt.hash(otp, 10);
-
     otpStore[email] = { hashedOtp, email };
 
     const mailOptions = {
       from: "thaparbankingsolutions@gmail.com",
       to: email,
-      subject: "Your OTP Code",
+      subject: "Your Password Reset OTP Code",
       text: `Your OTP code is ${otp}`,
     };
 
     await transporter.sendMail(mailOptions);
+    console.log(`[OTP-RESET] OTP sent to ${email}: ${otp}`);
     res.status(200).send("OTP sent successfully");
   } catch (error) {
     console.error("Error sending OTP:", error);
     res.status(500).send("Error sending OTP");
   }
 });
+
 module.exports = router;

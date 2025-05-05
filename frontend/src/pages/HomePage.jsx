@@ -11,7 +11,7 @@ import CategoryComponent from "../filterComponents/CategoryComponent";
 import PriceRangeComponent from "../filterComponents/PriceRangeComponent";
 import BrandListComponent from "../filterComponents/BrandListComponent";
 import Loader from "../components/Loader";
-import OtpInput from "../components/OtpInput.jsx";
+
 const pageSize = 10;
 
 const HomePage = () => {
@@ -28,6 +28,7 @@ const HomePage = () => {
   const [sortValue, setSortValue] = useState("Select value");
   const [allbrandList, setAllBrandList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [pagination, setPagination] = useState({
     count: 100,
     from: 0,
@@ -54,7 +55,6 @@ const HomePage = () => {
   const getProduct = async () => {
     try {
       const response = await axios.get("http://localhost:5000/product");
-
       setProductList(response.data);
       setOriginalData(response.data);
 
@@ -174,10 +174,14 @@ const HomePage = () => {
 
   return (
     <div className="homepage-container">
-    <OtpInput/>
-
       <NavBar />
-      <div className="filters">
+      <button
+        className="filter-toggle"
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        {showFilters ? "Hide Filters" : "Show Filters"}
+      </button>
+      <div className={`filters ${showFilters ? "expanded" : "collapsed"}`}>
         <button className="clear-button" onClick={handleClearFilters}>
           Clear filters
         </button>
@@ -228,11 +232,11 @@ const HomePage = () => {
               count={Math.ceil(pagination.count / pageSize)}
               onChange={(e, value) => handlePagination(e, value)}
               sx={{
-                "& .MuiPaginationItem-root": { color: "white" }, // Text color
+                "& .MuiPaginationItem-root": { color: "white" },
                 "& .Mui-selected": {
                   backgroundColor: "#493d9e",
                   color: "white",
-                }, // Selected page color
+                },
                 "& .MuiPaginationItem-root:hover": {
                   backgroundColor: "#66BB6A",
                   color: "white",

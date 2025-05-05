@@ -133,9 +133,13 @@ body {
     justify-content: center;
   }
 
-  .pagination {
-    margin-left: 250px;
-  }
+
+    .pagination {
+      margin-left: 0;
+      justify-content: center;
+    }
+
+
 }
 
 /* For mobile screens */
@@ -188,5 +192,54 @@ body {
 
   .products {
     padding: 10px;
+  }
+}
+/* -- Filter Toggle Button for Mobile -- */
+.filter-toggle {
+  display: none;
+  background: linear-gradient(135deg, #493d9e, #6a1e55);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 20px auto;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.filter-toggle:hover {
+  background: linear-gradient(135deg, #372a78, #8b1e5a);
+  transform: scale(1.05);
+}
+
+.filter-toggle:active {
+  transform: scale(0.98);
+}
+
+
+/* Show toggle on small screens */
+@media (max-width: 768px) {
+  .filter-toggle {
+    display: block;
+  }
+
+  .filters.collapsed {
+    display: none;
+  }
+
+  .filters.expanded {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    margin: 10px auto;
+    background: #f4f4f4;
+    border-radius: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    max-height: 500px;
   }
 }

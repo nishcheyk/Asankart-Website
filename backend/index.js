@@ -21,6 +21,7 @@ app.use("/product", product);
 app.use("/users", user);
 app.use("/order", order);
 app.use("/chat", require("./Routes/chat"));
+app.use("/emailOtp", require("./Routes/EmailOtp"));
 
 
 app.listen(port, () => {

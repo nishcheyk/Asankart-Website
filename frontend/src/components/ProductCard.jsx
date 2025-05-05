@@ -7,7 +7,7 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Rating from "@mui/material/Rating";
 import Stack from "@mui/material/Stack";
-import { Button } from "@mui/material";
+import { Button, Box } from "@mui/material";
 import { useNavigate } from "react-router";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 
@@ -28,9 +28,6 @@ const ProductCard = (props) => {
   let imageInterval = useRef(null);
 
   useEffect(() => {
-    console.log("Fetched Product:", product);
-    console.log("Images Array:", product?.images);
-    console.log("Current Index:", currentImageIndex);
     setToken(localStorage.getItem("token"));
     setIsAdmin(localStorage.getItem("isAdmin"));
   }, []);
@@ -59,7 +56,6 @@ const ProductCard = (props) => {
       const response = await axios.delete(
         "http://localhost:5000/product/delete/" + id
       );
-      console.log(response.data);
       if (response.data === "Product deleted!") {
         props.getProduct();
       }
@@ -69,7 +65,6 @@ const ProductCard = (props) => {
   };
 
   const handleAddToCart = (product) => {
-    console.log(amountInputRef.current.value);
     const product_item = {
       product: product,
       amount: amountInputRef.current.value,
@@ -81,23 +76,26 @@ const ProductCard = (props) => {
     <Card
       sx={{
         display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: { xs: "flex-start", md: "center" },
         justifyContent: "space-between",
-        height: "80%",
+        gap: 2,
         width: "100%",
         background: "#DAD2FF",
+        p: 2,
+        my: 2,
       }}
     >
+      {/* Image Section */}
       <Card
         sx={{
-          width: 300,
-          height: 200,
+          width: { xs: "100%", sm: 250, md: 300 },
+          height: { xs: 180, sm: 200 },
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
-          m: 2,
+          m: "auto",
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -111,28 +109,33 @@ const ProductCard = (props) => {
             height: "100%",
             objectFit: "contain",
             transition: "opacity 0.5s ease-in-out",
-            boxShadow: "none",
-            backgroundColor: "transparent", // Ensure background is fully transparent
-            filter: "drop-shadow(0 0 0 transparent)", // Removes any browser-applied shadows
+            backgroundColor: "transparent",
+            filter: "drop-shadow(0 0 0 transparent)",
           }}
         />
       </Card>
 
-      <Card sx={{ width: "70%", height: "100%", objectFit: "contain", mx: 2 }}>
-        <CardContent sx={{ flex: "1 1 auto" }}>
+      {/* Text Content */}
+      <Card
+        sx={{
+          width: { xs: "100%", md: "60%" },
+          height: "100%",
+          mx: { xs: 0, md: 2 },
+        }}
+      >
+        <CardContent>
           <Stack spacing={1}>
-            <Typography variant="h5" component="div">
-              {product.title}
-            </Typography>
+            <Typography variant="h6">{product.title}</Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{
-                maxHeight: "40px", // Limit the height
+                fontSize: { xs: "14px", sm: "16px" },
+                maxHeight: "48px",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "-webkit-box",
-                WebkitLineClamp: 3, // Limit to 3 lines
+                WebkitLineClamp: 3,
                 WebkitBoxOrient: "vertical",
               }}
             >
@@ -146,15 +149,16 @@ const ProductCard = (props) => {
                 precision={0.5}
                 readOnly
               />
-              <Typography variant="body1" color="text.primary">
+              <Typography variant="body2" color="text.primary">
                 {product.rating}
               </Typography>
             </Stack>
+
             <Stack direction="column">
-              <Typography variant="h5" color="text.primary">
+              <Typography variant="h6" color="text.primary">
                 ₹ {product.price}
               </Typography>
-              <Typography variant="body1" color="text.primary">
+              <Typography variant="body2" color="text.primary">
                 Price discount: {product.discountPercentage}%
               </Typography>
             </Stack>
@@ -162,9 +166,17 @@ const ProductCard = (props) => {
         </CardContent>
       </Card>
 
-      <CardActions sx={{ mx: 2 }}>
+      {/* Actions */}
+      <CardActions
+        sx={{
+          mx: 2,
+          width: { xs: "100%", md: "auto" },
+          justifyContent: { xs: "space-between", md: "flex-end" },
+          flexWrap: "wrap",
+        }}
+      >
         {token && isAdmin === "true" ? (
-          <Stack direction="row">
+          <Stack direction="row" spacing={1}>
             <Button
               color="primary"
               variant="contained"
@@ -181,19 +193,24 @@ const ProductCard = (props) => {
             </Button>
           </Stack>
         ) : (
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems="center"
+            spacing={1}
+            sx={{ width: "100%" }}
+          >
             <Button
               variant="contained"
               color="primary"
               endIcon={<AddShoppingCartIcon />}
               onClick={() => handleAddToCart(product)}
-              sx={{ borderRadius: "40px" }}
+              sx={{ borderRadius: "40px", width: { xs: "100%", sm: "auto" } }}
             >
               + Add
             </Button>
             <TextField
               inputRef={amountInputRef}
-              sx={{ width: 80, textAlign: "center" }}
+              sx={{ width: { xs: "100%", sm: 80 } }}
               label="Amount"
               id={"amount_" + product._id}
               type="number"

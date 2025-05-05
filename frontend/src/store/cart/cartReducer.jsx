@@ -1,33 +1,33 @@
-import { ADD_TO_CART, REMOVE_ITEM } from "./actionTypes";
+import { ADD_TO_CART, REMOVE_ITEM, CLEAR_CART } from "./actionTypes";
 
 const initState = {
   addedItems: [],
   total: 0,
+  orderStatus: "", // New status field
 };
+
 const cartReducer = (state = initState, action) => {
-  //INSIDE HOME COMPONENT
+  // Adding item to cart
   if (action.type === ADD_TO_CART) {
-    console.log("acion", action);
     let addedItem = action.item.product;
     let itemAmount = action.item.amount;
-    console.log("Added itme", addedItem);
-    console.log("state", state.addedItems);
-    //check if the action id exists in the addedItems
-    let existed_item = state.addedItems.find(
-      (item) => addedItem._id === item._id
-    );
-    console.log("existing item", existed_item);
-    if (existed_item) {
-      let updatedItem = { ...existed_item };
-      updatedItem.quantity =
-        parseInt(updatedItem.quantity) + parseInt(itemAmount);
 
-      // Create a new array for the modified addedItems
+    // Find if the item already exists in the cart
+    let existed_item = state.addedItems.find((item) => addedItem._id === item._id);
+
+    if (existed_item) {
+      let updatedQty = parseInt(existed_item.quantity) + parseInt(itemAmount);
+
+      // Check for max quantity limit of 5
+      if (updatedQty > 5) {
+        return state; // Don't allow adding more than 5
+      }
+
+      let updatedItem = { ...existed_item, quantity: updatedQty };
       let updatedAddedItems = state.addedItems.map((item) =>
         item._id === existed_item._id ? updatedItem : item
       );
-      console.log("STATE", state);
-      console.log("total", state.total + addedItem.price * itemAmount);
+
       return {
         ...state,
         addedItems: updatedAddedItems,
@@ -35,62 +35,52 @@ const cartReducer = (state = initState, action) => {
       };
     } else {
       addedItem.quantity = parseInt(itemAmount);
-      console.log(addedItem);
-      //calculating the total
-      let newTotal = state.total + addedItem.price * itemAmount;
-      console.log("STATE", state);
       return {
         ...state,
         addedItems: [...state.addedItems, addedItem],
-        total: newTotal,
+        total: state.total + addedItem.price * itemAmount,
       };
     }
-  } else if (action.type === REMOVE_ITEM) {
-    console.log("ACTION ID", action.id);
-    let existed_item = state.addedItems.find((item) => action.id === item._id);
-    if (existed_item.quantity > 1) {
-      let updatedItem = { ...existed_item };
-      updatedItem.quantity -= 1;
+  }
 
-      // Create a new array for the modified addedItems
+  // Removing item from cart
+  if (action.type === REMOVE_ITEM) {
+    let existed_item = state.addedItems.find((item) => action.id === item._id);
+    if (!existed_item) return state;
+
+    // Reduce quantity or remove item entirely
+    if (existed_item.quantity > 1) {
+      let updatedItem = { ...existed_item, quantity: existed_item.quantity - 1 };
       let updatedAddedItems = state.addedItems.map((item) =>
         item._id === existed_item._id ? updatedItem : item
       );
-      console.log("STATE", state);
+
       return {
         ...state,
         addedItems: updatedAddedItems,
         total: state.total - existed_item.price,
       };
     } else {
-      let existed_item = state.addedItems.find(
-        (item) => action.id === item._id
-      );
-      let new_items = state.addedItems.filter((item) => action.id !== item._id);
-
-      //calculating the total
-      let newTotal = state.total - existed_item.price * existed_item.quantity;
-
+      let new_items = state.addedItems.filter((item) => item._id !== action.id);
       return {
         ...state,
         addedItems: new_items,
-        total: newTotal,
+        total: state.total - existed_item.price,
       };
     }
-  } else {
-    /* 
-  if (action.type === ADD_QUANTITY) {
-    let addedItem = state.items.find((item) => item.id === action.id);
-    addedItem.quantity += 1;
-    let newTotal = state.total + addedItem.price;
+  }
+
+  // Clear Cart after successful order confirmation
+  if (action.type === CLEAR_CART) {
     return {
       ...state,
-      total: newTotal,
+      addedItems: [],
+      total: 0,
+      orderStatus: "Order Confirmed", // Change status to order confirmed
     };
-  }*/
-
-    return state;
   }
+
+  return state;
 };
 
 export default cartReducer;

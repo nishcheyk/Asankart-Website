@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import logo from "../img/logo_2.png";
-import SearchComponent from "../filterComponents/SearchComponent";
 import { AuthContext } from "../context/authContext";
 import "../css/navBar.css";
 
@@ -37,39 +36,61 @@ const NavBar = () => {
     <nav className="navbar">
       <div className="navbar-menu">
         <button className="navbar-button" onClick={() => goTo("/")}>
-          <span class="button-content"> Home</span>
+          <span className="button-content">Home</span>
         </button>
-        <button className="navbar-button" onClick={() => goTo("/about")}>
-          <span class="button-content">About Us </span>
-        </button>
-        <button className="navbar-button" onClick={() => goTo("/contact")}>
-          <span class="button-content">Contact Us </span>
-        </button>
-        <button
-          className="navbar-button"
-          onClick={() => goTo("/customer-service")}
-        >
-          <span class="button-content">Customer Service </span>
-        </button>
+
+        {isAdmin ? (
+          <>
+            <button
+              className="admin-button"
+              onClick={() => goTo("/addProduct")}
+            >
+              <span className="button-content">+Add Product</span>
+            </button>
+            <button className="admin-button" onClick={() => goTo("/order")}>
+              <span className="button-content">All Orders</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="navbar-button" onClick={() => goTo("/about")}>
+              <span className="button-content">About Us</span>
+            </button>
+            <button className="navbar-button" onClick={() => goTo("/contact")}>
+              <span className="button-content">Contact Us</span>
+            </button>
+            <button
+              className="navbar-button"
+              onClick={() => goTo("/customer-service")}
+            >
+              <span className="button-content">Customer Service</span>
+            </button>
+          </>
+        )}
       </div>
 
       <button className="navbar-logo-btn" onClick={() => goTo("/")}>
-        {" "}
         <img className="navbar-logo" src={logo} alt="Logo" />
       </button>
 
       <div className="navbar-items">
-        {isAdmin && token ? (
-          <button className="navbar-button" onClick={() => goTo("/addProduct")}>
-            <span class="button-content"> +Add Product</span>
-          </button>
-        ) : (
-          <button className="navbar-cart" onClick={() => goTo("/cart")}>
-            <span class="button-content">🛒 </span>
-            {items.length > 0 && (
-              <span className="cart-count">{items.length}</span>
+        {!isAdmin && (
+          <div className="tooltip-wrapper">
+            <button
+              className="navbar-cart"
+              onClick={() => (token ? goTo("/cart") : goTo("/login"))}
+            >
+              <span className="button-content">🛒</span>
+              {items.length > 0 && (
+                <span className="cart-count">{items.length}</span>
+              )}
+            </button>
+            {!token && (
+              <span className="tooltip-text">
+                Please log in to view your cart
+              </span>
             )}
-          </button>
+          </div>
         )}
 
         {token ? (
@@ -78,15 +99,20 @@ const NavBar = () => {
               className="navbar-button"
               onClick={() => setShowDropdown(!showDropdown)}
             >
-              Account ▼
+              <span className="button-content">Account ▼</span>
             </button>
             {showDropdown && (
               <div className="dropdown-menu">
                 <button className="dropdown-item">Public profile</button>
                 <button className="dropdown-item">Settings</button>
-                <button className="dropdown-item" onClick={() => goTo("/order")}>My Orders</button>
-
-
+                {!isAdmin && (
+                  <button
+                    className="dropdown-item"
+                    onClick={() => goTo("/order")}
+                  >
+                    My Orders
+                  </button>
+                )}
                 <button className="dropdown-item" onClick={logOut}>
                   Log Out
                 </button>
@@ -95,7 +121,7 @@ const NavBar = () => {
           </div>
         ) : (
           <button className="navbar-button" onClick={() => goTo("/login")}>
-            <span class="button-content">Login </span>
+            <span className="button-content">Login</span>
           </button>
         )}
       </div>

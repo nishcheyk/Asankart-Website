@@ -41,11 +41,8 @@ const NavBar = () => {
 
         {isAdmin ? (
           <>
-            <button
-              className="admin-button"
-              onClick={() => goTo("/addProduct")}
-            >
-              <span className="button-content">+Add Product</span>
+            <button className="admin-button" onClick={() => goTo("/addProduct")}>
+              <span className="button-content">+ Add Product</span>
             </button>
             <button className="admin-button" onClick={() => goTo("/order")}>
               <span className="button-content">All Orders</span>
@@ -59,10 +56,7 @@ const NavBar = () => {
             <button className="navbar-button" onClick={() => goTo("/contact")}>
               <span className="button-content">Contact Us</span>
             </button>
-            <button
-              className="navbar-button"
-              onClick={() => goTo("/customer-service")}
-            >
+            <button className="navbar-button" onClick={() => goTo("/customer-service")}>
               <span className="button-content">Customer Service</span>
             </button>
           </>
@@ -81,15 +75,9 @@ const NavBar = () => {
               onClick={() => (token ? goTo("/cart") : goTo("/login"))}
             >
               <span className="button-content">🛒</span>
-              {items.length > 0 && (
-                <span className="cart-count">{items.length}</span>
-              )}
+              {items.length > 0 && <span className="cart-count">{items.length}</span>}
             </button>
-            {!token && (
-              <span className="tooltip-text">
-                Please log in to view your cart
-              </span>
-            )}
+            {!token && <span className="tooltip-text">Please log in to view your cart</span>}
           </div>
         )}
 
@@ -103,19 +91,12 @@ const NavBar = () => {
             </button>
             {showDropdown && (
               <div className="dropdown-menu">
-                <button className="dropdown-item">Public profile</button>
-                <button className="dropdown-item">Settings</button>
+                <button className="dropdown-item" onClick={() => goTo("/settings")}>Settings</button>
+                <button className="dropdown-item" onClick={() => goTo("/faq")}>FAQ</button>
                 {!isAdmin && (
-                  <button
-                    className="dropdown-item"
-                    onClick={() => goTo("/order")}
-                  >
-                    My Orders
-                  </button>
+                  <button className="dropdown-item" onClick={() => goTo("/order")}>My Orders</button>
                 )}
-                <button className="dropdown-item" onClick={logOut}>
-                  Log Out
-                </button>
+                <button className="dropdown-item" onClick={logOut}>Log Out</button>
               </div>
             )}
           </div>

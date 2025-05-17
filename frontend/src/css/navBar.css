@@ -192,9 +192,10 @@
 
 .dropdown-item {
   display: block;
-  margin: 10px 5px;
+  margin: 10px 0px;
   width: 100%;
   padding: 10px;
+  border-radius: 10px;
   border: none;
   background: none;
   text-align: left;

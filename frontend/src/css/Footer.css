@@ -1,0 +1,117 @@
+.footer {
+    margin-top: 100px; /* Reduced margin for better spacing */
+    background: linear-gradient(45deg, #1b2631, #2c3e50);
+    color: #ecf0f1;
+    padding: 60px 20px 40px;
+    font-family: 'Segoe UI', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-section h3,
+.footer-section h4 {
+    margin-bottom: 20px;
+    color: #f7dc6f;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+.footer-section p,
+.footer-section li {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #d5d8dc;
+    opacity: 0.8;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section li {
+    margin-bottom: 8px;
+}
+
+.footer-section a {
+    text-decoration: none;
+    color: #d5d8dc;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.footer-section a:hover {
+    color: #f7dc6f;
+    transform: translateX(5px);
+}
+
+.footer-socials li {
+    display: inline-block;
+    margin-right: 15px;
+    transition: transform 0.3s ease;
+}
+
+.footer-socials li:hover {
+    transform: translateY(-5px);
+}
+
+.footer-socials a {
+    color: #d5d8dc;
+    font-size: 1.3rem;
+}
+
+.footer-socials a:hover {
+    color: #f7dc6f;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.85rem;
+    border-top: 1px solid #34495e;
+    padding-top: 15px;
+    color: #aab7b8;
+    opacity: 0.7;
+}
+
+.footer-bottom p {
+    margin: 0;
+    font-weight: 300;
+}
+
+/* Animation for footer sections */
+.footer-section {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.footer-section:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.footer-section:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.footer-section:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.footer-section:nth-child(4) {
+    animation-delay: 0.8s;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

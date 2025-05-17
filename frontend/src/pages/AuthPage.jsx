@@ -1,23 +1,27 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../Css/Login.css";
 import NavBar from "../components/NavBar";
 import { AuthContext } from "../context/authContext";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import OtpInput from "../components/OtpInput"; // Make sure this component exists
+import OtpInput from "../components/OtpInput";
+import "../css/Login.css";
+
 
 const Auth = () => {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [isAdmin] = useState(false);
   const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  // Forget password & OTP states
+  // OTP States for Signup
+  const [signupOtpSent, setSignupOtpSent] = useState(false);
+  const [signupOtpVerified, setSignupOtpVerified] = useState(false);
+  const [signupOtp, setSignupOtp] = useState("");
+
+  // Forgot Password States
   const [forgotPassword, setForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
@@ -27,98 +31,113 @@ const Auth = () => {
   const navigate = useNavigate();
   const authContext = useContext(AuthContext);
 
-  const handleSubmit = async (e) => {
+  const handleInputChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = isRegistering ? "register" : "login";
-      const payload = isRegistering
-        ? { username, email, password, isAdmin }
-        : { email, password };
-
-      const response = await axios.post(
-        `http://localhost:5000/users/${endpoint}`,
-        payload
-      );
+      const response = await axios.post(`http://localhost:5000/users/login`, {
+        email: form.email,
+        password: form.password,
+      });
 
       const { token, userId, isAdmin: isAdminResp } = response.data;
       authContext.login(token, userId, isAdminResp);
-
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
       localStorage.setItem("isAdmin", isAdminResp);
 
       navigate(isAdminResp ? "/admin" : "/");
     } catch (err) {
-      const msg =
-        err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Authentication failed";
-      setError(msg);
+      setError(err?.response?.data?.message || "Login failed");
       setOpenSnackbar(true);
     }
   };
 
-  useEffect(() => {
-    if (error) {
-      const timeout = setTimeout(() => {
-        setError(null);
-        setOpenSnackbar(false);
-      }, 3000);
-      return () => clearTimeout(timeout);
+  const sendSignupOtp = async (e) => {
+    e.preventDefault();
+
+    if (!form.username || !form.email || !form.password) {
+      setError("Please fill in all fields before proceeding.");
+      setOpenSnackbar(true);
+      return;
     }
-  }, [error]);
 
-  // Forgot password logic
-  const handleForgotPassword = () => {
-    setForgotPassword(true);
-  };
-
-  const handleResetPassword = async (event) => {
-    event.preventDefault();
     try {
-      await axios.post(`http://localhost:5000/emailOtp/send-otp`, {
-        email: resetEmail,
-      });
-      setShowOtpInput(true);
-      setError(null);
-    } catch (error) {
-      setError("Error sending OTP: " + (error.response?.data?.message || error.message));
+      const check = await axios.post("http://localhost:5000/users/check-email", { email: form.email });
+
+      if (check.data.exists) {
+        setError("Email is already registered. Please login or reset your password.");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      await axios.post("http://localhost:5000/emailOtp/send-otp", { email: form.email });
+      setSignupOtpSent(true);
+    } catch (err) {
+      const msg = err?.response?.data?.message || "Something went wrong. Please try again.";
+      setError("Signup error: " + msg);
+      setOpenSnackbar(true);
+    }
+
+  };
+
+  const verifySignupOtp = async () => {
+    try {
+      await axios.post("http://localhost:5000/emailOtp/verify-otp", { email: form.email, otp: signupOtp });
+      setSignupOtpVerified(true);
+    } catch (err) {
+      setError("Invalid OTP: " + err?.response?.data?.message);
       setOpenSnackbar(true);
     }
   };
 
-  const handleOtpChange = async (otp) => {
-    if (otp.length === 4) {
-      try {
-        await axios.post(`http://localhost:5000/emailOtp/verify-otp`, {
-          email: resetEmail,
-          otp,
-        });
-        setIsOtpVerified(true);
-        setError(null);
-      } catch (error) {
-        setIsOtpVerified(false);
-        setError("Error verifying OTP: " + (error.response?.data?.message || error.message));
-        setOpenSnackbar(true);
-      }
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    if (!signupOtpVerified) return;
+
+    try {
+      await axios.post("http://localhost:5000/users/register", { ...form, isAdmin });
+      setIsRegistering(false);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Signup failed");
+      setOpenSnackbar(true);
     }
   };
 
-  const handleNewPasswordSubmit = async (event) => {
-    event.preventDefault();
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`http://localhost:5000/emailOtp/send-otp`, { email: resetEmail });
+      setShowOtpInput(true);
+    } catch (err) {
+      setError("Error sending OTP: " + err.message);
+      setOpenSnackbar(true);
+    }
+  };
+
+  const verifyResetOtp = async (otp) => {
+    try {
+      await axios.post(`http://localhost:5000/emailOtp/verify-otp`, { email: resetEmail, otp });
+      setIsOtpVerified(true);
+    } catch (err) {
+      setError("Invalid OTP: " + err.message);
+      setOpenSnackbar(true);
+    }
+  };
+
+  const resetPassword = async (e) => {
+    e.preventDefault();
     try {
       await axios.post(`http://localhost:5000/emailOtp/reset-password`, {
         email: resetEmail,
         newPassword,
       });
-
       setForgotPassword(false);
-      setShowOtpInput(false);
-      setIsOtpVerified(false);
-      setError(null);
-      setOpenSnackbar(true);
-    } catch (error) {
-      setError("Error resetting password: " + (error.response?.data?.message || error.message));
+    } catch (err) {
+      setError("Reset failed: " + err.message);
       setOpenSnackbar(true);
     }
   };
@@ -126,145 +145,92 @@ const Auth = () => {
   return (
     <>
       <NavBar />
-      <div className="main1">
-        <div className="wrapper1">
-          <div className="card-switch">
-            <label className="switch">
-              <input
-                type="checkbox"
-                className="toggle"
-                checked={isRegistering}
-                onChange={() => setIsRegistering(!isRegistering)}
-              />
-              <span className="slider"></span>
-              <span className="card-side"></span>
-              <div className="flip-card__inner">
-                {forgotPassword ? (
-                  <div className="flip-card__front">
-                    <div className="title">
-                      {showOtpInput ? (isOtpVerified ? "Reset Password" : "Verify OTP") : "Forgot Password"}
-                    </div>
-                    {!showOtpInput ? (
-                      <form className="flip-card__form" onSubmit={handleResetPassword}>
-                        <input
-                          className="flip-card__input"
-                          type="email"
-                          placeholder="Enter your email"
-                          value={resetEmail}
-                          onChange={(e) => setResetEmail(e.target.value)}
-                          required
-                        />
-                        <button className="flip-card__btn" type="submit">Send OTP</button>
-                      </form>
-                    ) : !isOtpVerified ? (
-                      <OtpInput length={4} onOtpChange={handleOtpChange} />
-                    ) : (
-                      <form className="flip-card__form" onSubmit={handleNewPasswordSubmit}>
-                        <input
-                          className="flip-card__input"
-                          type="password"
-                          placeholder="Enter new password"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          required
-                        />
-                        <button className="flip-card__btn" type="submit">Reset Password</button>
-                      </form>
-                    )}
-                    <div
-                      style={{ marginTop: "10px", cursor: "pointer", color: "#007bff" }}
-                      onClick={() => setForgotPassword(false)}
-                    >
-                      Back to Login
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* Login Form */}
-                    <div className="flip-card__front">
-                      <div className="title">Log in</div>
-                      <form className="flip-card__form" onSubmit={handleSubmit}>
-                        <input
-                          className="flip-card__input"
-                          name="email"
-                          placeholder="Email"
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
-                        <input
-                          className="flip-card__input"
-                          name="password"
-                          placeholder="Password"
-                          type="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
-                        <button className="flip-card__btn" type="submit">
-                          Let's go!
-                        </button>
-                        <div
-                          style={{ marginTop: "10px", cursor: "pointer", color: "#007bff" }}
-                          onClick={handleForgotPassword}
-                        >
-                          Forgot Password?
-                        </div>
-                      </form>
-                    </div>
-
-                    {/* Register Form */}
-                    <div className="flip-card__back">
-                      <div className="title">Sign up</div>
-                      <form className="flip-card__form" onSubmit={handleSubmit}>
-                        <input
-                          className="flip-card__input"
-                          placeholder="Username"
-                          type="text"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          required
-                        />
-                        <input
-                          className="flip-card__input"
-                          name="email"
-                          placeholder="Email"
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
-                        <input
-                          className="flip-card__input"
-                          name="password"
-                          placeholder="Password"
-                          type="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
-                        <button className="flip-card__btn" type="submit">
-                          Confirm!
-                        </button>
-                      </form>
-                    </div>
-                  </>
-                )}
-              </div>
-            </label>
+      <div className="auth-modern__container">
+        <div className="auth-modern__box">
+          <div className="auth-modern__toggle">
+            <button
+              className={!isRegistering && !forgotPassword ? "active" : ""}
+              onClick={() => {
+                setIsRegistering(false);
+                setForgotPassword(false);
+              }}
+            >
+              Login
+            </button>
+            <button
+              className={isRegistering && !forgotPassword ? "active" : ""}
+              onClick={() => {
+                setIsRegistering(true);
+                setForgotPassword(false);
+              }}
+            >
+              Sign Up
+            </button>
           </div>
+
+          {forgotPassword ? (
+            <div className="auth-modern__form">
+              <h2>{showOtpInput ? (isOtpVerified ? "Reset Password" : "Verify OTP") : "Forgot Password"}</h2>
+              {!showOtpInput ? (
+                <form onSubmit={handleForgotPassword}>
+                  <input
+                    type="email"
+                    placeholder="Enter email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                  />
+                  <button type="submit">Send OTP</button>
+                </form>
+              ) : !isOtpVerified ? (
+                <OtpInput length={4} onOtpChange={verifyResetOtp} />
+              ) : (
+                <form onSubmit={resetPassword}>
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                  <button type="submit">Reset Password</button>
+                </form>
+              )}
+            </div>
+          ) : !isRegistering ? (
+            <form className="auth-modern__form" onSubmit={handleLogin}>
+              <h2>Login</h2>
+              <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleInputChange} required />
+              <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleInputChange} required />
+              <button type="submit">Login</button>
+              <div className="auth-modern__link" onClick={() => setForgotPassword(true)}>
+                Forgot Password?
+              </div>
+            </form>
+          ) : !signupOtpSent ? (
+            <form className="auth-modern__form" onSubmit={sendSignupOtp}>
+              <h2>Sign Up</h2>
+              <input type="text" name="username" placeholder="Username" value={form.username} onChange={handleInputChange} required />
+              <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleInputChange} required />
+              <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleInputChange} required />
+              <button type="submit">Send OTP</button>
+            </form>
+          ) : !signupOtpVerified ? (
+            <div className="auth-modern__form">
+              <h2>Verify OTP</h2>
+              <OtpInput length={4} onOtpChange={setSignupOtp} />
+              <button onClick={verifySignupOtp}>Verify</button>
+            </div>
+          ) : (
+            <form className="auth-modern__form" onSubmit={handleSignup}>
+              <button type="submit">Register</button>
+            </form>
+          )}
         </div>
       </div>
 
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={3000}
-        onClose={() => setOpenSnackbar(false)}
-      >
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {error}
-        </Alert>
+      <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)}>
+        <Alert severity="error" sx={{ width: "100%" }}>{error}</Alert>
       </Snackbar>
     </>
   );

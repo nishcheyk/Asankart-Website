@@ -1,16 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../css/Chatbox.css';
-import assistantImg from '../img/Customer.png'; // add your image here
+import assistantImg from '../img/Customer.png';
 
 const ChatBox = () => {
   const [messages, setMessages] = useState([
     { sender: 'bot', text: 'Hi! I’m Ava, your virtual assistant. How can I help you today?' }
   ]);
   const [input, setInput] = useState('');
-  const chatEndRef = useRef(null);
+  const chatBoxRef = useRef(null); // ✅ define the actual ref
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const chatBox = chatBoxRef.current;
+    if (chatBox) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
   }, [messages]);
 
   const handleSend = async (e) => {
@@ -20,16 +23,19 @@ const ChatBox = () => {
     const userMsg = { sender: 'user', text: input };
     setMessages(prev => [...prev, userMsg]);
 
-    const res = await fetch('http://localhost:5000/chat/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: input })
-    });
-    const data = await res.json();
-
-    setTimeout(() => {
-      setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
-    }, 600);
+    try {
+      const res = await fetch('http://localhost:5000/chat/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input })
+      });
+      const data = await res.json();
+      setTimeout(() => {
+        setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
+      }, 600);
+    } catch {
+      setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, something went wrong!' }]);
+    }
 
     setInput('');
   };
@@ -42,14 +48,15 @@ const ChatBox = () => {
 
       <div className="chat-container">
         <div className="chat-header">💬 Customer Support</div>
-        <div className="chat-box">
+
+        <div className="chat-box" ref={chatBoxRef}>
           {messages.map((msg, i) => (
             <div key={i} className={`chat-message ${msg.sender}`}>
               {msg.text}
             </div>
           ))}
-          <div ref={chatEndRef} />
         </div>
+
         <form onSubmit={handleSend} className="chat-input-form">
           <input
             value={input}

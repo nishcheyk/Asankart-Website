@@ -1,0 +1,136 @@
+.settings-container {
+  width: 90%;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.settings-container h1 {
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 32px;
+  color: #111;
+  font-weight: 600;
+}
+
+.settings-container .settings-form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+}
+
+.settings-container .settings-form label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.settings-container .settings-form input {
+  padding: 12px 14px;
+  background-color: #ffffff;
+  border: 1px solid #d1d1d6;
+  border-radius: 12px;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.settings-container .settings-form input:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+}
+
+.settings-container .settings-form button {
+  padding: 12px 20px;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.settings-container .settings-form button:hover {
+  background-color: #005ecb;
+  transform: translateY(-1px);
+}
+
+.settings-container .delete-account {
+  width: 100%;
+  padding: 14px;
+  background-color: #ff3b30;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s;
+  margin-top: 20px;
+}
+
+.settings-container .delete-account:hover {
+  background-color: #c12722;
+  transform: translateY(-1px);
+}
+
+.settings-container .otp-section {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-container .otp-section label {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.settings-container .otp-section input {
+  padding: 12px 14px;
+  background-color: #ffffff;
+  border: 1px solid #d1d1d6;
+  border-radius: 12px;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.settings-container .otp-section button {
+  padding: 12px 20px;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.settings-container .otp-section button:hover {
+  background-color: #005ecb;
+}
+
+.settings-container .error-message {
+  background-color: #fdecea;
+  color: #d93025;
+  padding: 12px 16px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.settings-container .success-message {
+  background-color: #e6f4ea;
+  color: #137333;
+  padding: 12px 16px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}

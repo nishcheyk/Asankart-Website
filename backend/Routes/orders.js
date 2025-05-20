@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { Order } = require("../models/orders");
+const { Order } = require("../Models/orders.js");
 const router = express.Router();
 
 // Post new order

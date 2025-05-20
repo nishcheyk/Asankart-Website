@@ -10,7 +10,7 @@ const user = require("./Routes/users");
 const order = require("./Routes/orders");
 
 mongoose
-  .connect("mongodb://localhost:27017/ECommerce")
+  .connect("mongodb+srv://nishcheycapture2014:Zyg3LKZ1qSNQSAaQ@ecommerece.wywgm4l.mongodb.net/")
   .then(() => console.log("Connected to MongoDB..."))
   .catch((err) => console.error("Could not connect to MongoDB..."));
 

@@ -74,7 +74,7 @@ const Auth = () => {
         return;
       }
 
-      await axios.post("http://localhost:5000/emailOtp/send-otp", { email: form.email });
+      await axios.post("http://localhost:5000/emailOtp/send-otp-signup", { email: form.email });
       setSignupOtpSent(true);
     } catch (err) {
       const msg = err?.response?.data?.message || "Something went wrong. Please try again.";

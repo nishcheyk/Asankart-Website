@@ -11,13 +11,12 @@ import CategoryComponent from "../filterComponents/CategoryComponent";
 import PriceRangeComponent from "../filterComponents/PriceRangeComponent";
 import BrandListComponent from "../filterComponents/BrandListComponent";
 import Loader from "../components/Loader";
+import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 
 const pageSize = 10;
 
 const HomePage = () => {
   const [productList, setProductList] = useState([]);
-  const [originalData, setOriginalData] = useState([]);
-  const [originalBrandList, setOriginalBrandList] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
@@ -30,27 +29,40 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [pagination, setPagination] = useState({
-    count: 100,
+    count: 0,
     from: 0,
     to: pageSize,
   });
-
-  const handlePagination = (event, page) => {
-    const from = (page - 1) * pageSize;
-    const to = (page - 1) * pageSize + pageSize;
-    setPagination({ ...pagination, from: from, to: to });
-  };
+  const [token, setToken] = useState();
+  const [isAdmin, setIsAdmin] = useState();
 
   useEffect(() => {
-    setPagination({ ...pagination, count: productList.length });
-  }, [pagination.from, pagination.to, productList, pagination.count]);
+    const fetchMeta = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/product/meta");
+        setAllBrandList(res.data.brands.map(b => ({ value: b, checked: false })));
+        setMinPrice(res.data.minPrice);
+        setMaxPrice(res.data.maxPrice);
+        setMinPriceDinamic(res.data.minPrice);
+        setMaxPriceDinamic(res.data.maxPrice);
+        setPriceRange([res.data.minPrice, res.data.maxPrice]);
+      } catch (e) { console.log(e); }
+    };
+    fetchMeta();
+  }, []);
+
+  const [originalData, setOriginalData] = useState([]);
+  const [originalBrandList, setOriginalBrandList] = useState([]);
+
+  useEffect(() => {
+    setToken(localStorage.getItem("token"));
+    setIsAdmin(localStorage.getItem("isAdmin"));
+  }, []);
 
   useEffect(() => {
     setLoading(true);
     getProduct();
   }, []);
-
-  useEffect(() => {}, [priceRange, allbrandList, minPrice, maxPrice]);
 
   const getProduct = async () => {
     try {
@@ -88,10 +100,7 @@ const HomePage = () => {
     setMinPriceDinamic(minPrice);
     setMaxPriceDinamic(maxPrice);
     setPriceRange([minPrice, maxPrice]);
-
-    setAllBrandList(
-      originalBrandList.map((item) => ({ ...item, checked: false }))
-    );
+    setAllBrandList(originalBrandList.map((item) => ({ ...item, checked: false })));
     setProductList(originalData);
   };
 
@@ -159,7 +168,6 @@ const HomePage = () => {
     const updatedBrands = [...allbrandList];
     updatedBrands[index].checked = !updatedBrands[index].checked;
     setAllBrandList(updatedBrands);
-
     const selectedBrands = updatedBrands
       .filter((brand) => brand.checked)
       .map((b) => b.value);
@@ -171,6 +179,16 @@ const HomePage = () => {
       );
     }
   };
+
+  const handlePagination = (event, page) => {
+    const from = (page - 1) * pageSize;
+    const to = (page - 1) * pageSize + pageSize;
+    setPagination({ ...pagination, from: from, to: to });
+  };
+
+  useEffect(() => {
+    setPagination({ ...pagination, count: productList.length });
+  }, [pagination.from, pagination.to, productList, pagination.count]);
 
   return (
     <div className="homepage-container">
@@ -207,46 +225,95 @@ const HomePage = () => {
         />
       </div>
       {loading ? (
-        <Loader />
-      ) : (
-        <>
-          <div className="products">
-            {productList.length !== 0 ? (
-              productList
-                .slice(pagination.from, pagination.to)
-                .map((product) => (
-                  <ProductCard
-                    key={product._id}
-                    product={product}
-                    getProduct={getProduct}
-                  />
-                ))
-            ) : (
-              <div className="no-products">
-                <img src={not_found_pic} alt="Not Found" />
+  <Loader />
+) : (
+  <div className="products">
+    {productList.length !== 0 ? (
+      isAdmin === "true" ? (
+        <DragDropContext
+          onDragEnd={async (result) => {
+            if (!result.destination) return;
+            const items = Array.from(productList);
+            const [movedItem] = items.splice(result.source.index, 1);
+            items.splice(result.destination.index, 0, movedItem);
+            setProductList(items);
+            try {
+              await axios.post("http://localhost:5000/product/reorder", {
+                productIds: items.map((item) => item._id),
+              });
+              getProduct();
+            } catch (err) {
+              console.error("Reorder failed:", err);
+            }
+          }}
+        >
+          <Droppable droppableId="adminProductList">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                {productList
+                  .slice(pagination.from, pagination.to)
+                  .map((product, index) => (
+                    <Draggable
+                      key={product._id}
+                      draggableId={product._id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <ProductCard
+                            key={product._id}
+                            product={product}
+                            getProduct={getProduct}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                {provided.placeholder}
               </div>
             )}
-          </div>
-          <div className="pagination">
-            <Pagination
-              count={Math.ceil(pagination.count / pageSize)}
-              onChange={(e, value) => handlePagination(e, value)}
-              sx={{
-                "& .MuiPaginationItem-root": { color: "white" },
-                "& .Mui-selected": {
-                  backgroundColor: "#493d9e",
-                  color: "white",
-                },
-                "& .MuiPaginationItem-root:hover": {
-                  backgroundColor: "#66BB6A",
-                  color: "white",
-                },
-              }}
+          </Droppable>
+        </DragDropContext>
+      ) : (
+        productList
+          .slice(pagination.from, pagination.to)
+          .map((product) => (
+            <ProductCard
+              key={product._id}
+              product={product}
+              getProduct={getProduct}
             />
-          </div>
-        </>
-      )}
-      
+          ))
+      )
+    ) : (
+      <div className="no-products">
+        <img src="/not-found.png" alt="Not Found" />
+      </div>
+    )}
+    <div className="pagination">
+      <Pagination
+        count={Math.ceil(pagination.count / pageSize)}
+        onChange={(e, value) => handlePagination(e, value)}
+        sx={{
+          "& .MuiPaginationItem-root": { color: "white" },
+          "& .Mui-selected": {
+            backgroundColor: "#493d9e",
+            color: "white",
+          },
+          "& .MuiPaginationItem-root:hover": {
+            backgroundColor: "#66BB6A",
+            color: "white",
+          },
+        }}
+      />
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

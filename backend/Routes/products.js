@@ -7,10 +7,25 @@ const router = express.Router();
 // Get all products from the database
 router.get("/", async (req, res) => {
   try {
-    const productList = await Product.find();
+    const productList = await Product.find().sort({ order: 1 });
     res.json(productList);
   } catch (error) {
     console.error("Error fetching products:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Add this route BEFORE the '/:id' route to prevent CastError for 'meta'
+router.get("/meta", async (req, res) => {
+  try {
+    const products = await Product.find();
+    const prices = products.map((p) => p.price);
+    const brands = [...new Set(products.map((p) => p.brand))];
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    res.json({ minPrice, maxPrice, brands });
+  } catch (error) {
+    console.error("Error fetching meta:", error);
     res.status(500).send("Internal Server Error");
   }
 });
@@ -32,6 +47,8 @@ router.get("/:id", async (req, res) => {
 // Create a new product
 router.post("/create", async (req, res) => {
   try {
+    const count = await Product.countDocuments();
+    req.body.data.order = count;
     const newProduct = new Product(req.body.data);
     await newProduct.save();
     res.send("Product saved to the database!");
@@ -108,6 +125,45 @@ router.post("/purchase", async (req, res) => {
     res.send("Purchase successful!");
   } catch (error) {
     console.error("Error processing purchase:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.post("/reorder", async (req, res) => {
+  const reordered = req.body.productIds;
+  if (!Array.isArray(reordered)) {
+    return res.status(400).send("Invalid productIds array");
+  }
+  try {
+    // Fetch current orders from DB for these products
+    const ids = reordered.map((p) => p._id || p);
+    const products = await Product.find({ _id: { $in: ids } });
+    const orderMap = {};
+    products.forEach((p) => {
+      orderMap[p._id.toString()] = p.order;
+    });
+    // Only update if order has changed
+    const updates = reordered
+      .map((productId, index) => {
+        const id = productId._id || productId;
+        if (orderMap[id] !== index) {
+          return {
+            updateOne: {
+              filter: { _id: id },
+              update: { $set: { order: index } },
+            },
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+    if (updates.length === 0) {
+      return res.send("No products needed reordering.");
+    }
+    await Product.bulkWrite(updates);
+    res.send("Products reordered successfully!");
+  } catch (error) {
+    console.error("Error reordering products:", error);
     res.status(500).send("Internal Server Error");
   }
 });

@@ -56,8 +56,11 @@ const ProductCard = (props) => {
       const response = await axios.delete(
         "http://localhost:5000/product/delete/" + id
       );
-      if (response.data === "Product deleted!") {
-        props.getProduct();
+      if (
+        response.data === "Product deleted successfully!" ||
+        response.data === "Product deleted!"
+      ) {
+        if (props.getProduct) props.getProduct();
       }
     } catch (e) {
       console.log(e);

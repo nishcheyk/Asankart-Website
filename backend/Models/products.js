@@ -11,6 +11,7 @@ const productSchema = new mongoose.Schema({
   category: { type: String, required: true },
   thumbnail: { type: String, required: true },
   images: { type: [String], required: true },
+  order:{type:Number}
 });
 
 const Product = mongoose.model("Product", productSchema);

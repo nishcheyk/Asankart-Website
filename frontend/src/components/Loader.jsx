@@ -14,8 +14,9 @@ const Loader = () => {
         position: "fixed",
         top: 0,
         left: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.1)", // Optional: light overlay
-        transform: "scale(2.5)"
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        transform: "scale(2.5)",
+        zIndex: 9999
       }}
     >
       <div

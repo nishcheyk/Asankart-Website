@@ -93,6 +93,96 @@ const HomePage = () => {
     setLoading(false);
   };
 
+  const handleCatChange = (value) => {
+    setCategory(value);
+    applyAllFilters(value, searchValue, sortValue, minPriceDinamic, maxPriceDinamic, allbrandList);
+  };
+
+  const handleSearch = (value) => {
+    setSearchValue(value);
+    applyAllFilters(category, value, sortValue, minPriceDinamic, maxPriceDinamic, allbrandList);
+  };
+
+  const handleSort = (value) => {
+    setSortValue(value);
+    applyAllFilters(category, searchValue, value, minPriceDinamic, maxPriceDinamic, allbrandList);
+  };
+
+  const handlePriceRange = (event, newValue) => {
+    setPriceRange(newValue);
+    setMinPriceDinamic(newValue[0]);
+    setMaxPriceDinamic(newValue[1]);
+    applyAllFilters(category, searchValue, sortValue, newValue[0], newValue[1], allbrandList);
+  };
+
+  const handleMinPrice = (event) => {
+    const newMinPrice = parseInt(event.target.value);
+    setMinPriceDinamic(newMinPrice);
+    applyAllFilters(category, searchValue, sortValue, newMinPrice, maxPriceDinamic, allbrandList);
+  };
+
+  const handleMaxPrice = (event) => {
+    const newMaxPrice = parseInt(event.target.value);
+    setMaxPriceDinamic(newMaxPrice);
+    applyAllFilters(category, searchValue, sortValue, minPriceDinamic, newMaxPrice, allbrandList);
+  };
+
+  const handleChanges = (index) => {
+    const updatedBrands = [...allbrandList];
+    updatedBrands[index].checked = !updatedBrands[index].checked;
+    setAllBrandList(updatedBrands);
+    applyAllFilters(category, searchValue, sortValue, minPriceDinamic, maxPriceDinamic, updatedBrands);
+  };
+
+  const applyAllFilters = (cat, search, sort, minPrice, maxPrice, brands) => {
+    let filteredData = [...originalData];
+
+    // Apply category filter
+    if (cat && cat !== "all") {
+      filteredData = filteredData.filter((item) => item.category === cat);
+    }
+
+    // Apply search filter
+    if (search && search !== "") {
+      filteredData = filteredData.filter((item) =>
+        item.title.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // Apply price range filter
+    filteredData = filteredData.filter(
+      (item) => item.price >= minPrice && item.price <= maxPrice
+    );
+
+    // Apply brand filter
+    const selectedBrands = brands
+      .filter((brand) => brand.checked)
+      .map((b) => b.value);
+    if (selectedBrands.length > 0) {
+      filteredData = filteredData.filter((product) =>
+        selectedBrands.includes(product.brand)
+      );
+    }
+
+    // Apply sorting
+    if (sort && sort !== "Select value") {
+      if (sort === "ascendingprice")
+        filteredData.sort((a, b) => a.price - b.price);
+      else if (sort === "descendingprice")
+        filteredData.sort((a, b) => b.price - a.price);
+      else if (sort === "ascendingrating")
+        filteredData.sort((a, b) => a.rating - b.rating);
+      else if (sort === "descendingrating")
+        filteredData.sort((a, b) => b.rating - a.rating);
+      else if (sort === "ascpricediscount")
+        filteredData.sort((a, b) => a.discountPercentage - b.discountPercentage);
+      else if (sort === "descpricediscount")
+        filteredData.sort((a, b) => b.discountPercentage - a.discountPercentage);
+    }
+
+    setProductList(filteredData);
+  };
+
   const handleClearFilters = () => {
     setSearchValue("");
     setCategory("all");
@@ -102,82 +192,6 @@ const HomePage = () => {
     setPriceRange([minPrice, maxPrice]);
     setAllBrandList(originalBrandList.map((item) => ({ ...item, checked: false })));
     setProductList(originalData);
-  };
-
-  const handleSearch = (value) => {
-    setSearchValue(value);
-    setProductList(
-      value === ""
-        ? originalData
-        : originalData.filter((item) =>
-            item.title.toLowerCase().includes(value.toLowerCase())
-          )
-    );
-  };
-
-  const handleSort = (value) => {
-    let sortedData = [...productList];
-    setSortValue(value);
-    if (value === "ascendingprice")
-      sortedData.sort((a, b) => a.price - b.price);
-    else if (value === "descendingprice")
-      sortedData.sort((a, b) => b.price - a.price);
-    else if (value === "ascendingrating")
-      sortedData.sort((a, b) => a.rating - b.rating);
-    else if (value === "descendingrating")
-      sortedData.sort((a, b) => b.rating - a.rating);
-    else if (value === "ascpricediscount")
-      sortedData.sort((a, b) => a.discountPercentage - b.discountPercentage);
-    else if (value === "descpricediscount")
-      sortedData.sort((a, b) => b.discountPercentage - a.discountPercentage);
-    else sortedData = originalData;
-    setProductList(sortedData);
-  };
-
-  const handleCatChange = (value) => {
-    setCategory(value);
-    setProductList(
-      value === "all"
-        ? originalData
-        : originalData.filter((item) => item.category === value)
-    );
-  };
-
-  const handlePriceRange = (event, newValue) => {
-    setPriceRange(newValue);
-    setMinPriceDinamic(newValue[0]);
-    setMaxPriceDinamic(newValue[1]);
-    setProductList(
-      originalData.filter(
-        (item) => item.price >= newValue[0] && item.price <= newValue[1]
-      )
-    );
-  };
-
-  const handleMinPrice = (event) => {
-    setMinPriceDinamic(parseInt(event.target.value));
-    handlePriceRange(null, [parseInt(event.target.value), maxPriceDinamic]);
-  };
-
-  const handleMaxPrice = (event) => {
-    setMaxPriceDinamic(parseInt(event.target.value));
-    handlePriceRange(null, [minPriceDinamic, parseInt(event.target.value)]);
-  };
-
-  const handleChanges = (index) => {
-    const updatedBrands = [...allbrandList];
-    updatedBrands[index].checked = !updatedBrands[index].checked;
-    setAllBrandList(updatedBrands);
-    const selectedBrands = updatedBrands
-      .filter((brand) => brand.checked)
-      .map((b) => b.value);
-    if (selectedBrands.length === 0) {
-      setProductList(originalData);
-    } else {
-      setProductList(
-        originalData.filter((product) => selectedBrands.includes(product.brand))
-      );
-    }
   };
 
   const handlePagination = (event, page) => {
@@ -199,6 +213,7 @@ const HomePage = () => {
       >
         {showFilters ? "Hide Filters" : "Show Filters"}
       </button>
+      <div className="main-content">
       <div className={`filters ${showFilters ? "expanded" : "collapsed"}`}>
         <button className="clear-button" onClick={handleClearFilters}>
           Clear filters
@@ -313,7 +328,7 @@ const HomePage = () => {
     </div>
   </div>
 )}
-
+      </div>
     </div>
   );
 };

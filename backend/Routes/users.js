@@ -43,6 +43,7 @@ router.post("/register", async (req, res) => {
     const data = {
       token,
       userId: newUser.id,
+      username: newUser.username,
       isAdmin: newUser.isAdmin,
     };
     res.status(201).json(data);
@@ -70,6 +71,7 @@ router.post("/login", async (req, res) => {
     const data = {
       token,
       userId: user.id,
+      username: user.username,
       isAdmin: user.isAdmin,
     };
     res.json(data);

@@ -43,10 +43,11 @@ const Auth = () => {
         password: form.password,
       });
 
-      const { token, userId, isAdmin: isAdminResp } = response.data;
-      authContext.login(token, userId, isAdminResp);
+      const { token, userId, username, isAdmin: isAdminResp } = response.data;
+      authContext.login(token, userId, username, isAdminResp);
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
+      localStorage.setItem("username", username);
       localStorage.setItem("isAdmin", isAdminResp);
 
       navigate(isAdminResp ? "/admin" : "/");

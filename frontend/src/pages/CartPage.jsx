@@ -16,30 +16,23 @@ import {
   Typography,
   Stack,
   Card,
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Avatar,
-  InputAdornment,
   useMediaQuery,
+  TextField,
+  Box,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Remove as RemoveIcon,
-  AccountCircle,
-  Home as HomeIcon,
-  Flag as FlagIcon,
-  LocationCity as LocationCityIcon,
-  MarkunreadMailbox,
   LocalMall as LocalMallIcon,
 } from "@mui/icons-material";
 import NavBar from "../components/NavBar";
 import { addToCart, removeFromCart } from "../store/cart/cartActions";
 import axios from "axios";
-import LoginForm from "../pages/AuthPage";
-import RegisterForm from "../pages/AuthPage";
 import emptyCart from "../img/emptycart.png";
 
 const CartPage = () => {
@@ -49,21 +42,19 @@ const CartPage = () => {
   const addedItems = useSelector((state) => state.cartStore.addedItems);
   const total = useSelector((state) => state.cartStore.total);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [open, setOpen] = useState(false);
-  const [accountDialog, setAccountDialog] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
   const [confirmShow, setConfirmShow] = useState(false);
-  const isMobile = useMediaQuery("(max-width:768px)");
-
-  const [checkoutForm, setCheckoutForm] = useState({
+  const [orderFormShow, setOrderFormShow] = useState(false);
+  const [orderForm, setOrderForm] = useState({
     firstName: "",
     lastName: "",
     address: "",
     city: "",
     country: "",
     zipCode: "",
-    mobileNumber: "", // Added mobile number
+    mobileNumber: "",
   });
+  const [orderLoading, setOrderLoading] = useState(false);
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   useEffect(() => {
     if (total !== undefined) {
@@ -87,68 +78,63 @@ const CartPage = () => {
   };
 
   const handleCheckout = () => {
-    const { mobileNumber } = checkoutForm;
-    const isValidMobile = /^[0-9]{10}$/.test(mobileNumber);
-
-    if (!isValidMobile) {
-      alert("Please enter a valid 10-digit mobile number.");
-      return;
-    }
-
-    if (!authContext.token) {
-      setOpen(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate('/login');
     } else {
-      setConfirmShow(true);
+      setOrderFormShow(true);
     }
-  };
-
-  const handleFormInput = (e) => {
-    const { name, value } = e.target;
-    setCheckoutForm({ ...checkoutForm, [name]: value });
-  };
-
-  const handleGoToLogin = () => {
-    setShowLogin(true);
-    setAccountDialog(true);
-    setOpen(false);
-  };
-
-  const handleCreateAccount = () => {
-    setShowLogin(false);
-    setAccountDialog(true);
-    setOpen(false);
-  };
-
-  const handleCloseAccountDialog = () => {
-    setAccountDialog(false);
-    setConfirmShow(true);
   };
 
   const handleCancel = () => {
     setConfirmShow(false);
+    setOrderFormShow(false);
   };
 
-  const handleConfirm = async () => {
-    const order = {
-      userID: localStorage.getItem("userId"),
-      ...checkoutForm,
-      totalAmount,
-      items: addedItems,
-      createdDate: new Date(),
-    };
+  const handleOrderFormChange = (e) => {
+    const { name, value } = e.target;
+    setOrderForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePlaceOrder = async () => {
+    setOrderLoading(true);
 
     try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+
+      const orderData = {
+        userID: userId,
+        firstName: orderForm.firstName,
+        lastName: orderForm.lastName,
+        address: orderForm.address,
+        city: orderForm.city,
+        country: orderForm.country,
+        zipCode: orderForm.zipCode,
+        mobileNumber: orderForm.mobileNumber,
+        totalAmount: totalAmount.toString(),
+        items: addedItems,
+        createdDate: new Date(),
+      };
+
       const response = await axios.post("http://localhost:5000/order/create", {
-        data: order,
+        data: orderData
       });
 
-      if (response.data.message === "Order saved to the database") {
-        dispatch({ type: "CLEAR_CART" }); // Clear the cart
-        setConfirmShow(false);
-        navigate("/order");
+      if (response.status === 201) {
+        alert("Order placed successfully!");
+        dispatch({ type: 'CLEAR_CART' });
+        setOrderFormShow(false);
+        navigate('/order');
       }
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert(error.response?.data?.message || "Failed to place order. Please try again.");
+    } finally {
+      setOrderLoading(false);
     }
   };
 
@@ -212,136 +198,24 @@ const CartPage = () => {
             </Paper>
           </Grid>
 
-          {/* Checkout Form */}
+          {/* Checkout Button */}
           <Grid item xs={12} md={6}>
             <Paper elevation={3} sx={{ p: 3 }}>
               <Typography variant="h6" align="center" gutterBottom>
-                Checkout form
+                Ready to Checkout?
               </Typography>
-
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="First Name"
-                    name="firstName"
-                    value={checkoutForm.firstName}
-                    onChange={handleFormInput}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <AccountCircle />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Last Name"
-                    name="lastName"
-                    value={checkoutForm.lastName}
-                    onChange={handleFormInput}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <AccountCircle />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Address"
-                    name="address"
-                    value={checkoutForm.address}
-                    onChange={handleFormInput}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <HomeIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="City"
-                    name="city"
-                    value={checkoutForm.city}
-                    onChange={handleFormInput}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LocationCityIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Country"
-                    name="country"
-                    value={checkoutForm.country}
-                    onChange={handleFormInput}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <FlagIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Zip code"
-                    name="zipCode"
-                    value={checkoutForm.zipCode}
-                    onChange={handleFormInput}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MarkunreadMailbox />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-
-                {/* Mobile Number Field */}
-                <Grid item xs={12}>
-                  <TextField
-                    label="Mobile Number"
-                    name="mobileNumber"
-                    value={checkoutForm.mobileNumber}
-                    onChange={handleFormInput}
-                    fullWidth
-                    inputProps={{ maxLength: 10 }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <AccountCircle />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-
-                <Grid item xs={12} textAlign="center">
-                  <Button variant="contained" onClick={handleCheckout}>
-                    Checkout
-                  </Button>
-                </Grid>
-              </Grid>
+              <Typography variant="body2" align="center" sx={{ mb: 3 }}>
+                Click the button below to complete your purchase.
+              </Typography>
+              <Button
+                variant="contained"
+                size="large"
+                fullWidth
+                onClick={handleCheckout}
+                sx={{ py: 2 }}
+              >
+                Proceed to Checkout
+              </Button>
             </Paper>
           </Grid>
         </Grid>
@@ -360,39 +234,106 @@ const CartPage = () => {
         </Grid>
       )}
 
-      {/* Login / Register Prompt */}
-      <Dialog open={open}>
-        <DialogTitle>Do you have an account?</DialogTitle>
-        <DialogActions>
-          <Button onClick={handleCreateAccount} variant="contained" color="secondary">
-            Create
-          </Button>
-          <Button onClick={handleGoToLogin} variant="contained" color="primary" autoFocus>
-            Login
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Auth Dialog */}
-      <Dialog open={accountDialog} onClose={handleCloseAccountDialog}>
+      {/* Order Form Dialog */}
+      <Dialog open={orderFormShow} onClose={handleCancel} maxWidth="md" fullWidth>
+        <DialogTitle>Complete Your Order</DialogTitle>
         <DialogContent>
-          {showLogin ? (
-            <LoginForm closeForm={handleCloseAccountDialog} />
-          ) : (
-            <RegisterForm closeForm={handleCloseAccountDialog} />
-          )}
+          <Box sx={{ mt: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="First Name"
+                  name="firstName"
+                  value={orderForm.firstName}
+                  onChange={handleOrderFormChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  name="lastName"
+                  value={orderForm.lastName}
+                  onChange={handleOrderFormChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Address"
+                  name="address"
+                  value={orderForm.address}
+                  onChange={handleOrderFormChange}
+                  multiline
+                  rows={2}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="City"
+                  name="city"
+                  value={orderForm.city}
+                  onChange={handleOrderFormChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Country"
+                  name="country"
+                  value={orderForm.country}
+                  onChange={handleOrderFormChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="ZIP Code"
+                  name="zipCode"
+                  value={orderForm.zipCode}
+                  onChange={handleOrderFormChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Mobile Number"
+                  name="mobileNumber"
+                  value={orderForm.mobileNumber}
+                  onChange={handleOrderFormChange}
+                  required
+                  helperText="Enter 10-digit mobile number"
+                />
+              </Grid>
+            </Grid>
+            <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+              <Typography variant="h6" gutterBottom>Order Summary</Typography>
+              <Typography>Total Amount: ₹{totalAmount}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {addedItems.length} item(s) in your order
+              </Typography>
+            </Box>
+          </Box>
         </DialogContent>
-      </Dialog>
-
-      {/* Confirm Order Dialog */}
-      <Dialog open={confirmShow} onClose={handleCancel}>
-        <DialogTitle>Confirm your order?</DialogTitle>
         <DialogActions>
-          <Button onClick={handleCancel} variant="contained" color="error">
+          <Button onClick={handleCancel} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleConfirm} variant="contained" color="success" autoFocus>
-            Confirm
+          <Button
+            onClick={handlePlaceOrder}
+            variant="contained"
+            color="primary"
+            disabled={orderLoading || !orderForm.firstName || !orderForm.lastName || !orderForm.address || !orderForm.city || !orderForm.country || !orderForm.zipCode || !orderForm.mobileNumber}
+          >
+            {orderLoading ? 'Placing Order...' : 'Place Order'}
           </Button>
         </DialogActions>
       </Dialog>

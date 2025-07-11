@@ -10,6 +10,8 @@ import Stack from "@mui/material/Stack";
 import { Button, Box } from "@mui/material";
 import { useNavigate } from "react-router";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import RateReviewIcon from "@mui/icons-material/RateReview";
+import { useMediaQuery } from "@mui/material";
 
 import { addToCart, removeFromCart } from "../store/cart/cartActions";
 import { useDispatch } from "react-redux";
@@ -26,6 +28,8 @@ const ProductCard = (props) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [hovered, setHovered] = useState(false);
   let imageInterval = useRef(null);
+
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
     setToken(localStorage.getItem("token"));
@@ -80,28 +84,48 @@ const ProductCard = (props) => {
       sx={{
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
-        alignItems: { xs: "flex-start", md: "center" },
+        alignItems: { xs: "stretch", md: "center" },
         justifyContent: "space-between",
-        gap: 2,
+        gap: { xs: 1.5, md: 3 },
         width: "100%",
-        background: "#DAD2FF",
-        p: 2,
-        my: 2,
+        background: "linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%)",
+        borderRadius: "16px",
+        p: { xs: 1.5, sm: 2.5 },
+        my: 1.5,
+        minHeight: { xs: "auto", md: 220 },
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+        border: "1px solid rgba(255, 255, 255, 0.3)",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-2px)",
+          boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
+        },
       }}
     >
       {/* Image Section */}
       <Card
         sx={{
-          width: { xs: "100%", sm: 250, md: 300 },
-          height: { xs: 180, sm: 200 },
+          width: { xs: "100%", sm: 280, md: 280 },
+          height: { xs: 220, sm: 220, md: 220 },
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
-          m: "auto",
+          m: { xs: "auto", md: 0 },
+          cursor: "pointer",
+          flexShrink: 0,
+          borderRadius: "12px",
+          background: "white",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+          transition: "all 0.3s ease",
+          "&:hover": {
+            transform: "scale(1.02)",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+          },
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onClick={() => navigate(`/product/${product._id}`)}
       >
         <CardMedia
           component="img"
@@ -114,6 +138,7 @@ const ProductCard = (props) => {
             transition: "opacity 0.5s ease-in-out",
             backgroundColor: "transparent",
             filter: "drop-shadow(0 0 0 transparent)",
+            padding: "8px",
           }}
         />
       </Card>
@@ -121,100 +146,230 @@ const ProductCard = (props) => {
       {/* Text Content */}
       <Card
         sx={{
-          width: { xs: "100%", md: "60%" },
-          height: "100%",
-          mx: { xs: 0, md: 2 },
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          minHeight: { xs: "auto", md: 220 },
+          background: "transparent",
+          boxShadow: "none",
+          minWidth: { md: "300px" },
         }}
       >
-        <CardContent>
-          <Stack spacing={1}>
-            <Typography variant="h6">{product.title}</Typography>
+        <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, flex: 1 }}>
+          <Stack spacing={1.5}>
             <Typography
-              variant="body2"
-              color="text.secondary"
+              variant="h6"
               sx={{
-                fontSize: { xs: "14px", sm: "16px" },
-                maxHeight: "48px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
+                cursor: "pointer",
+                fontSize: { xs: "1.1rem", sm: "1.3rem" },
+                fontWeight: 600,
+                lineHeight: 1.3,
+                color: "#2c3e50",
+                transition: "color 0.2s ease",
+                "&:hover": {
+                  color: "#3498db",
+                },
               }}
+              onClick={() => navigate(`/product/${product._id}`)}
             >
-              {product.description}
+              {product.title}
             </Typography>
-
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Rating
-                name="half-rating-read"
-                value={product.rating}
-                precision={0.5}
-                readOnly
-              />
-              <Typography variant="body2" color="text.primary">
-                {product.rating}
-              </Typography>
-            </Stack>
-
-            <Stack direction="column">
-              <Typography variant="h6" color="text.primary">
-                ₹ {product.price}
-              </Typography>
-              <Typography variant="body2" color="text.primary">
-                Price discount: {product.discountPercentage}%
-              </Typography>
-            </Stack>
+            {!isMobile && (
+              <>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    fontSize: { xs: "0.9rem", sm: "1rem" },
+                    maxHeight: { xs: "70px", sm: "90px" },
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: { xs: 3, sm: 4 },
+                    WebkitBoxOrient: "vertical",
+                    lineHeight: 1.5,
+                    color: "#5a6c7d",
+                  }}
+                >
+                  {product.description}
+                </Typography>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Rating
+                    name="half-rating-read"
+                    value={product.rating}
+                    precision={0.5}
+                    readOnly
+                    size="small"
+                    sx={{
+                      "& .MuiRating-iconFilled": {
+                        color: "#f39c12",
+                      },
+                      "& .MuiRating-iconHover": {
+                        color: "#f39c12",
+                      },
+                    }}
+                  />
+                  <Typography
+                    variant="body2"
+                    color="text.primary"
+                    sx={{
+                      fontWeight: 500,
+                      color: "#34495e",
+                    }}
+                  >
+                    {product.rating}
+                  </Typography>
+                  {product.reviews && product.reviews.length > 0 && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        fontSize: "0.7rem",
+                        color: "#7f8c8d",
+                      }}
+                    >
+                      ({product.reviews.length} reviews)
+                    </Typography>
+                  )}
+                </Stack>
+                <Stack direction="column" spacing={0.8}>
+                  <Typography
+                    variant="h6"
+                    color="text.primary"
+                    sx={{
+                      fontSize: { xs: "1.2rem", sm: "1.4rem" },
+                      fontWeight: 700,
+                      color: "#e74c3c",
+                    }}
+                  >
+                    ₹ {product.price}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.primary"
+                    sx={{
+                      fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                      color: "#27ae60",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Save {product.discountPercentage}% off
+                  </Typography>
+                </Stack>
+              </>
+            )}
           </Stack>
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <CardActions
+      {/* Cart Actions - Now positioned on the right */}
+      <Box
         sx={{
-          mx: 2,
+          display: "flex",
+          flexDirection: { xs: "row", sm: "column" },
+          justifyContent: { xs: "space-between", sm: "center" },
+          alignItems: { xs: "center", sm: "center" },
+          gap: { xs: 1.5, sm: 1.5 },
+          p: { xs: 1.5, sm: 2.5 },
           width: { xs: "100%", md: "auto" },
-          justifyContent: { xs: "space-between", md: "flex-end" },
-          flexWrap: "wrap",
+          flexShrink: 0,
+          minWidth: { md: "220px" },
+          maxWidth: { md: "250px" },
         }}
       >
         {token && isAdmin === "true" ? (
-          <Stack direction="row" spacing={1}>
+          <Stack
+            direction={{ xs: "row", sm: "column" }}
+            spacing={1.5}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
             <Button
               color="primary"
               variant="contained"
+              size="small"
               onClick={() => handleUpdate(product._id)}
+              sx={{
+                fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                px: { xs: 1.5, sm: 2.5 },
+                borderRadius: "8px",
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #3498db, #2980b9)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #2980b9, #1f5f8b)",
+                },
+              }}
             >
               Update
             </Button>
             <Button
               color="error"
               variant="contained"
+              size="small"
               onClick={() => handleDelete(product._id)}
+              sx={{
+                fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                px: { xs: 1.5, sm: 2.5 },
+                borderRadius: "8px",
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #e74c3c, #c0392b)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #c0392b, #a93226)",
+                },
+              }}
             >
               Delete
             </Button>
           </Stack>
         ) : (
           <Stack
-            direction={{ xs: "column", sm: "row" }}
+            direction={{ xs: "row", sm: "column" }}
             alignItems="center"
-            spacing={1}
-            sx={{ width: "100%" }}
+            spacing={1.5}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           >
             <Button
               variant="contained"
               color="primary"
               endIcon={<AddShoppingCartIcon />}
               onClick={() => handleAddToCart(product)}
-              sx={{ borderRadius: "40px", width: { xs: "100%", sm: "auto" } }}
+              size="small"
+              sx={{
+                borderRadius: "25px",
+                width: { xs: "auto", sm: "100%" },
+                fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                px: { xs: 2, sm: 2.5 },
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #27ae60, #2ecc71)",
+                boxShadow: "0 2px 8px rgba(39, 174, 96, 0.3)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #2ecc71, #27ae60)",
+                  boxShadow: "0 4px 12px rgba(39, 174, 96, 0.4)",
+                  transform: "translateY(-1px)",
+                },
+              }}
             >
-              + Add
+              Add to Cart
             </Button>
             <TextField
               inputRef={amountInputRef}
-              sx={{ width: { xs: "100%", sm: 80 } }}
-              label="Amount"
+              size="small"
+              sx={{
+                width: { xs: 90, sm: 110 },
+                "& .MuiInputBase-input": {
+                  fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#3498db",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#3498db",
+                  },
+                },
+              }}
+              label="Qty"
               id={"amount_" + product._id}
               type="number"
               inputProps={{ min: 1, max: 10, step: 1 }}
@@ -225,7 +380,7 @@ const ProductCard = (props) => {
             />
           </Stack>
         )}
-      </CardActions>
+      </Box>
     </Card>
   );
 };

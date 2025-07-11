@@ -11,11 +11,13 @@ const NavBar = () => {
   const items = useSelector((state) => state.cartStore?.addedItems || []);
   const [token, setToken] = useState(null);
   const [isAdmin, setIsAdmin] = useState(null);
+  const [username, setUsername] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     setToken(localStorage.getItem("token"));
     setIsAdmin(localStorage.getItem("isAdmin") === "true");
+    setUsername(localStorage.getItem("username"));
   }, []);
 
   const goTo = (path) => {
@@ -27,6 +29,7 @@ const NavBar = () => {
     localStorage.clear();
     setIsAdmin(null);
     setToken(null);
+    setUsername(null);
     authContext.logout();
     navigate("/");
     setShowDropdown(false);
@@ -72,12 +75,11 @@ const NavBar = () => {
           <div className="tooltip-wrapper">
             <button
               className="navbar-cart"
-              onClick={() => (token ? goTo("/cart") : goTo("/login"))}
+              onClick={() => goTo("/cart")}
             >
               <span className="button-content">🛒</span>
               {items.length > 0 && <span className="cart-count">{items.length}</span>}
             </button>
-            {!token && <span className="tooltip-text">Please log in to view your cart</span>}
           </div>
         )}
 
@@ -87,7 +89,7 @@ const NavBar = () => {
               className="navbar-button"
               onClick={() => setShowDropdown(!showDropdown)}
             >
-              <span className="button-content">Account ▼</span>
+              <span className="button-content">{username || "Account"} ▼</span>
             </button>
             {showDropdown && (
               <div className="dropdown-menu">

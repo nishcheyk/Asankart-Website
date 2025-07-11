@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { Order } = require("../Models/orders.js");
+const Product = require("../Models/products");
 const router = express.Router();
 
 // Post new order
@@ -14,6 +15,26 @@ router.post("/create", async (req, res) => {
     if (!mobileRegex.test(orderData.mobileNumber)) {
       return res.status(400).json({ message: "Please enter a valid 10-digit mobile number." });
     }
+
+    // Check if all items are in stock and update stock
+    const items = orderData.items;
+    for (const item of items) {
+      const product = await Product.findById(item._id);
+      if (!product) {
+        return res.status(404).json({ message: `Product ${item._id} not found` });
+      }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({ message: `Product ${product.title} is out of stock. Available: ${product.stock}` });
+      }
+    }
+
+    // Update product stock
+    const stockUpdatePromises = items.map(async (item) => {
+      await Product.findByIdAndUpdate(item._id, {
+        $inc: { stock: -item.quantity },
+      });
+    });
+    await Promise.all(stockUpdatePromises);
 
     // Create the new order with a default status of 'Pending'
     const newOrder = new Order({
@@ -38,6 +59,7 @@ router.post("/create", async (req, res) => {
     res.status(500).json({ message: "Failed to save order to the database" });
   }
 });
+
 router.get("/all", async (req, res) => {
   try {
     const allOrders = await Order.find().sort({ createdDate: -1 }); // Newest first
@@ -47,6 +69,7 @@ router.get("/all", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch all orders" });
   }
 });
+
 // Get orders by user ID
 router.get("/:userId", async (req, res) => {
   const userID = req.params.userId;
@@ -82,8 +105,5 @@ router.put("/:orderId/status", async (req, res) => {
     res.status(500).json({ message: "Failed to update order status" });
   }
 });
-// Get all orders (admin only)
-
-
 
 module.exports = router;

@@ -168,4 +168,180 @@ router.post("/reorder", async (req, res) => {
   }
 });
 
+// Add review to a product (only for users who have delivered orders)
+router.post("/:id/review", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user, userName, rating, comment } = req.body;
+
+    // Validate required fields
+    if (!user || !rating || !comment) {
+      return res.status(400).json({
+        message: "Missing required fields: user, rating, and comment are required."
+      });
+    }
+
+    // Validate rating range
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({
+        message: "Rating must be between 1 and 5."
+      });
+    }
+
+    // First check if product exists
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if user has a delivered order for this product
+    const userOrders = await Order.find({
+      userID: user,
+      orderStatus: "Delivered"
+    });
+
+    if (userOrders.length === 0) {
+      return res.status(403).json({
+        message: "You haven't purchased any products yet, or none of your orders have been delivered. You can only review products you have purchased and received."
+      });
+    }
+
+    const hasDeliveredOrder = userOrders.some(order => {
+      // Parse items if it's a string
+      const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+
+      return items.some(item => {
+        // Handle different possible item structures
+        let itemId = null;
+
+        // Check if item has _id field
+        if (item._id) {
+          itemId = item._id.toString();
+        }
+        // Check if item has id field
+        else if (item.id) {
+          itemId = item.id.toString();
+        }
+        // Check if item itself is the ID
+        else if (typeof item === 'string') {
+          itemId = item;
+        }
+
+        const productId = id.toString();
+
+        return itemId === productId;
+      });
+    });
+
+    if (!hasDeliveredOrder) {
+      return res.status(403).json({
+        message: "You can only review products that you have purchased and received. Please ensure you have bought this specific product and it has been delivered."
+      });
+    }
+
+    // Check if user has already reviewed this product
+    const hasAlreadyReviewed = product.reviews.some(review =>
+      review.user === user || review.userName === userName
+    );
+
+    if (hasAlreadyReviewed) {
+      return res.status(409).json({
+        message: "You have already reviewed this product. You can only submit one review per product."
+      });
+    }
+
+    const newReview = {
+      user: user,
+      userName: userName || "Anonymous",
+      rating,
+      comment,
+      date: new Date()
+    };
+
+    product.reviews.push(newReview);
+    // Update product rating to average of all reviews
+    const totalRatings = product.reviews.reduce((sum, r) => sum + r.rating, 0);
+    product.rating = totalRatings / product.reviews.length;
+    await product.save();
+
+    res.status(201).json({
+      message: "Review added successfully! Thank you for your feedback.",
+      review: newReview
+    });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ message: "Failed to add review. Please try again." });
+  }
+});
+
+// Delete review from a product (only for the user who created it)
+router.delete("/:id/review/:reviewId", async (req, res) => {
+  try {
+    const { id, reviewId } = req.params;
+    const { user } = req.body;
+
+    // Validate required fields
+    if (!user) {
+      return res.status(400).json({
+        message: "User ID is required."
+      });
+    }
+
+    // First check if product exists
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Find the review
+    const reviewIndex = product.reviews.findIndex(review =>
+      review._id.toString() === reviewId && review.user === user
+    );
+
+    if (reviewIndex === -1) {
+      return res.status(404).json({
+        message: "Review not found or you don't have permission to delete this review"
+      });
+    }
+
+    // Remove the review
+    product.reviews.splice(reviewIndex, 1);
+    await product.save();
+
+    res.json({
+      message: "Review deleted successfully!"
+    });
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    res.status(500).json({ message: "Failed to delete review. Please try again." });
+  }
+});
+
+// Debug endpoint to check user's order data
+router.get("/debug/orders/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const userOrders = await Order.find({
+      userID: userId
+    });
+
+    const deliveredOrders = userOrders.filter(order => order.orderStatus === "Delivered");
+
+    res.json({
+      totalOrders: userOrders.length,
+      deliveredOrders: deliveredOrders.length,
+      orders: userOrders.map(order => ({
+        _id: order._id,
+        orderStatus: order.orderStatus,
+        items: order.items,
+        createdDate: order.createdDate
+      }))
+    });
+  } catch (error) {
+    console.error("Error fetching debug data:", error);
+    res.status(500).json({ message: "Failed to fetch debug data" });
+  }
+});
+
 module.exports = router;

@@ -1,87 +1,29 @@
-/* Container adjustments */
-.add-product-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5; /* Light background for better contrast */
-  padding: 20px;
+/* AddProduct component now uses Material-UI styling */
+/* This file is kept for potential future customizations */
+
+/* Custom scrollbar for the form if needed */
+.add-product-form::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* Paper container styling */
-.add-product-paper {
-  width: 600px;
-  padding: 30px;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+.add-product-form::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
 }
 
-/* Form title */
-.add-product-title {
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
+.add-product-form::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
 }
 
-/* Grid container for input fields */
-.add-product-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0px;
+.add-product-form::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
-/* Full width for text fields */
-.add-product-textfield {
-  width: 100%;
-  margin: 10px;
-}
-
-/* Image input section */
-.add-product-image-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Add Image button */
-.add-product-btn {
-  background-color: #1976d2;
-  color: white;
-  font-weight: bold;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-}
-
-.add-product-btn:hover {
-  background-color: #1565c0;
-}
-
-/* Save button styling */
-.add-product-save-btn {
-  margin-top: 20px;
-  width: 100%;
-  background-color: #28a745;
-  color: white;
-  padding: 12px;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-}
-
-.add-product-save-btn:hover {
-  background-color: #218838;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .add-product-grid {
-    grid-template-columns: 1fr; /* Stack inputs on smaller screens */
+/* Responsive adjustments for very small screens */
+@media (max-width: 480px) {
+  .MuiPaper-root {
+    margin: 10px;
+    padding: 20px !important;
   }
 }

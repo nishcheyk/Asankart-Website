@@ -16,11 +16,13 @@ import Aboutus from "./pages/Aboutus.jsx";
 import Coustmerserivce from "./pages/Coustomerchat.jsx";
 import FAQ from "./pages/faq.jsx";
 import Settings from "./pages/Setting.jsx";
+import ProductPage from "./pages/ProductPage.jsx";
 
 function App() {
   const [userLoggedData, setUserLoggedData] = useState({
     token: null,
     userId: null,
+    username: null,
     isAdmin: false,
   });
   const [loading, setLoading] = useState(true);
@@ -28,25 +30,28 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
+    const username = localStorage.getItem("username");
     const isAdmin = localStorage.getItem("isAdmin") === "true";
 
     if (token && userId) {
-      setUserLoggedData({ token, userId, isAdmin });
+      setUserLoggedData({ token, userId, username, isAdmin });
     }
     setLoading(false);
   }, []);
 
-  const login = (token, userId, isAdmin) => {
+  const login = (token, userId, username, isAdmin) => {
     localStorage.setItem("token", token);
     localStorage.setItem("userId", userId);
+    localStorage.setItem("username", username);
     localStorage.setItem("isAdmin", isAdmin);
-    setUserLoggedData({ token, userId, isAdmin });
+    setUserLoggedData({ token, userId, username, isAdmin });
   };
 
   const logout = () => {
-    setUserLoggedData({ token: null, userId: null, isAdmin: false });
+    setUserLoggedData({ token: null, userId: null, username: null, isAdmin: false });
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
+    localStorage.removeItem("username");
     localStorage.removeItem("isAdmin");
   };
 
@@ -57,6 +62,7 @@ function App() {
       value={{
         token: userLoggedData.token,
         userId: userLoggedData.userId,
+        username: userLoggedData.username,
         isAdmin: userLoggedData.isAdmin,
         login,
         logout,
@@ -72,6 +78,7 @@ function App() {
         <Route path="/order" element={<OrdersPage />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="*" element={<Error404 />} />
+        <Route path="/product/:id" element={<ProductPage />} />
 
         {/* Protected routes */}
         <Route

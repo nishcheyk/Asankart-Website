@@ -6,7 +6,6 @@ const RequiredAuth = ({ children }) => {
   const authContext = React.useContext(AuthContext);
   const location = useLocation();
   const token = localStorage.getItem("token");
-  console.log(token);
   if (token === null && authContext.token === null) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

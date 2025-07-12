@@ -1,113 +1,56 @@
-import React, { memo } from "react";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import { Category } from "@mui/icons-material";
+import React from 'react';
+import { FormControl, InputLabel, Select, MenuItem, Box } from '@mui/material';
 
-const categories = [
-  {
-    value: "all",
-    label: "All Categories",
-  },
-  {
-    value: "Smartphones",
-    label: "Smartphones",
-  },
-  {
-    value: "Laptops",
-    label: "Laptops",
-  },
-  {
-    value: "Audio",
-    label: "Audio",
-  },
-  {
-    value: "Shoes",
-    label: "Shoes",
-  },
-  {
-    value: "TVs",
-    label: "TVs",
-  },
-  {
-    value: "Cameras",
-    label: "Cameras",
-  },
-  {
-    value: "Tablets",
-    label: "Tablets",
-  },
-  {
-    value: "Drones",
-    label: "Drones",
-  },
-  {
-    value: "Wearables",
-    label: "Wearables",
-  },
-  {
-    value: "Gaming",
-    label: "Gaming",
-  },
-  {
-    value: "Home Appliances",
-    label: "Home Appliances",
-  },
-];
+// CategoryComponent - product category filter karne ke liye
+const CategoryComponent = ({ selectedCategory, onCategoryChange, categories = [] }) => {
+  // Default categories agar koi nahi diya gaya hai
+  const defaultCategories = [
+    'All Categories',
+    'Electronics',
+    'Clothing',
+    'Books',
+    'Home & Garden',
+    'Sports',
+    'Beauty',
+    'Toys',
+    'Automotive',
+    'Health',
+    'Other'
+  ];
 
-const CategoryComponent = memo((props) => {
-  const handleChange = (event) => {
-    props.onChange(event.target.value);
-  };
+  // Categories array - ya default ya props se
+  const categoryList = categories.length > 0 ? categories : defaultCategories;
 
   return (
-    <div className="filter-section">
-      <FormControl
-        size="small"
-        sx={{
-          width: '100%',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: { xs: '8px', sm: '12px' },
-            fontSize: { xs: '13px', sm: '14px' },
-            '&:hover fieldset': {
-              borderColor: '#667eea',
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: '#764ba2',
-            },
-          },
-        }}
-      >
-        <InputLabel id="category-select-label" sx={{ fontSize: { xs: '13px', sm: '14px' } }}>Categories</InputLabel>
+    <Box sx={{ minWidth: '200px' }}>
+      <FormControl fullWidth>
+        <InputLabel>Category</InputLabel>
         <Select
-          labelId="category-select-label"
-          id="category-select"
-          value={props.categoryValue || ""}
-          label="Categories"
-          onChange={handleChange}
-          startAdornment={<Category sx={{ color: 'text.secondary', mr: 1, fontSize: 16 }} />}
+          value={selectedCategory}
+          onChange={(e) => onCategoryChange(e.target.value)}
+          label="Category"
           sx={{
-            '& .MuiSelect-select': {
-              fontSize: { xs: '13px', sm: '14px' },
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'grey.300',
             },
-            '& .MuiMenuItem-root': {
-              fontSize: { xs: '13px', sm: '14px' },
-            }
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'primary.main',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'primary.main',
+            },
           }}
         >
-          {categories.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
+          {/* Category options */}
+          {categoryList.map((category) => (
+            <MenuItem key={category} value={category}>
+              {category}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
-    </div>
+    </Box>
   );
-});
-
-CategoryComponent.displayName = 'CategoryComponent';
+};
 
 export default CategoryComponent;

@@ -1,47 +1,55 @@
 // components/Loader.js
 import React from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import "../css/Loader.css";
 
-const Loader = () => {
+// Loader component - loading spinner display karne ke liye
+const Loader = ({ message = "Loading..." }) => {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        width: "100vw",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        transform: "scale(2.5)",
-        zIndex: 9999
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '50vh', // Minimum height set karta hai
+        gap: 2, // Spinner aur text ke beech gap
       }}
+      className="loader-container"
     >
-      <div
-        aria-label="Orange and tan hamster running in a metal wheel"
-        role="img"
-        className="wheel-and-hamster"
+      {/* Spinning circle - loading indicator */}
+      <CircularProgress
+        size={60} // Size of spinner
+        thickness={4} // Thickness of spinner line
+        sx={{
+          color: 'primary.main', // Primary color use karta hai
+        }}
+      />
+
+      {/* Loading message */}
+      <Typography
+        variant="h6"
+        color="text.secondary"
+        sx={{
+          mt: 2, // Top margin
+          textAlign: 'center', // Center align text
+        }}
       >
-        <div className="wheel"></div>
-        <div className="hamster">
-          <div className="hamster__body">
-            <div className="hamster__head">
-              <div className="hamster__ear"></div>
-              <div className="hamster__eye"></div>
-              <div className="hamster__nose"></div>
-            </div>
-            <div className="hamster__limb hamster__limb--fr"></div>
-            <div className="hamster__limb hamster__limb--fl"></div>
-            <div className="hamster__limb hamster__limb--br"></div>
-            <div className="hamster__limb hamster__limb--bl"></div>
-            <div className="hamster__tail"></div>
-          </div>
-        </div>
-        <div className="spoke"></div>
-      </div>
-    </div>
+        {message}
+      </Typography>
+
+      {/* Additional loading text */}
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{
+          textAlign: 'center',
+          opacity: 0.7, // Slightly transparent
+        }}
+      >
+        Please wait while we fetch your data...
+      </Typography>
+    </Box>
   );
 };
 

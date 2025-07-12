@@ -252,7 +252,7 @@ router.post("/:id/review", async (req, res) => {
 
     const newReview = {
       user: user,
-      userName: userName || "Anonymous",
+      userName: userName || "Anonymous", // Always save the actual username
       rating,
       comment,
       date: new Date()

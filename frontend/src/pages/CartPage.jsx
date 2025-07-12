@@ -35,15 +35,20 @@ import { addToCart, removeFromCart } from "../store/cart/cartActions";
 import axios from "axios";
 import emptyCart from "../img/emptycart.png";
 
+// CartPage component - shopping cart ka complete functionality
 const CartPage = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const authContext = useContext(AuthContext);
-  const addedItems = useSelector((state) => state.cartStore.addedItems);
-  const total = useSelector((state) => state.cartStore.total);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [confirmShow, setConfirmShow] = useState(false);
-  const [orderFormShow, setOrderFormShow] = useState(false);
+  const navigate = useNavigate(); // Navigation ke liye
+  const dispatch = useDispatch(); // Redux dispatch function
+  const authContext = useContext(AuthContext); // Authentication context
+
+  // Redux store se cart data fetch karta hai
+  const addedItems = useSelector((state) => state.cartStore.addedItems); // Cart mein jo items hain
+  const total = useSelector((state) => state.cartStore.total); // Total amount
+
+  // Local state variables
+  const [totalAmount, setTotalAmount] = useState(0); // Formatted total amount
+  const [confirmShow, setConfirmShow] = useState(false); // Confirmation dialog
+  const [orderFormShow, setOrderFormShow] = useState(false); // Order form dialog
   const [orderForm, setOrderForm] = useState({
     firstName: "",
     lastName: "",
@@ -52,53 +57,62 @@ const CartPage = () => {
     country: "",
     zipCode: "",
     mobileNumber: "",
-  });
-  const [orderLoading, setOrderLoading] = useState(false);
-  const isMobile = useMediaQuery("(max-width:768px)");
+  }); // Order form data
+  const [orderLoading, setOrderLoading] = useState(false); // Order submit loading
+  const isMobile = useMediaQuery("(max-width:768px)"); // Mobile responsive check
 
+  // Total amount update karta hai jab cart change hota hai
   useEffect(() => {
     if (total !== undefined) {
-      setTotalAmount(parseFloat(total).toFixed(2));
+      setTotalAmount(parseFloat(total).toFixed(2)); // 2 decimal places format
     }
   }, [total, addedItems]);
 
+  // Back button - home page par navigate karta hai
   const goBack = () => navigate("/");
 
+  // Cart se item remove karne ka function
   const cartItemRemoveHandler = (id) => {
-    dispatch(removeFromCart(id));
+    dispatch(removeFromCart(id)); // Redux action dispatch karta hai
   };
 
+  // Cart mein item add karne ka function
   const cartItemAddHandler = (item) => {
+    // Maximum quantity check - 5 se zyada nahi allow karta
     if (item.quantity >= 5) {
       alert("Maximum quantity of 5 reached for this item.");
       return;
     }
     const product_item = { product: item, amount: 1 };
-    dispatch(addToCart(product_item));
+    dispatch(addToCart(product_item)); // Redux action dispatch karta hai
   };
 
+  // Checkout function - order form show karta hai
   const handleCheckout = () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate('/login');
+      navigate('/login'); // Agar logged in nahi hai to login page
     } else {
-      setOrderFormShow(true);
+      setOrderFormShow(true); // Order form dialog show karta hai
     }
   };
 
+  // Cancel function - dialogs close karta hai
   const handleCancel = () => {
     setConfirmShow(false);
     setOrderFormShow(false);
   };
 
+  // Order form input change handle karta hai
   const handleOrderFormChange = (e) => {
     const { name, value } = e.target;
     setOrderForm(prev => ({
       ...prev,
-      [name]: value
+      [name]: value // Form field update karta hai
     }));
   };
 
+  // Order place karne ka function - backend ko order data bhejta hai
   const handlePlaceOrder = async () => {
     setOrderLoading(true);
 
@@ -106,6 +120,7 @@ const CartPage = () => {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
 
+      // Order data prepare karta hai
       const orderData = {
         userID: userId,
         firstName: orderForm.firstName,
@@ -116,19 +131,20 @@ const CartPage = () => {
         zipCode: orderForm.zipCode,
         mobileNumber: orderForm.mobileNumber,
         totalAmount: totalAmount.toString(),
-        items: addedItems,
-        createdDate: new Date(),
+        items: addedItems, // Cart items
+        createdDate: new Date(), // Current date
       };
 
+      // Backend ko order data bhejta hai
       const response = await axios.post("http://localhost:5000/order/create", {
         data: orderData
       });
 
       if (response.status === 201) {
         alert("Order placed successfully!");
-        dispatch({ type: 'CLEAR_CART' });
-        setOrderFormShow(false);
-        navigate('/order');
+        dispatch({ type: 'CLEAR_CART' }); // Cart clear karta hai
+        setOrderFormShow(false); // Dialog close karta hai
+        navigate('/order'); // Orders page par navigate karta hai
       }
     } catch (error) {
       console.error("Error placing order:", error);
@@ -142,6 +158,7 @@ const CartPage = () => {
     <>
       <NavBar />
 
+      {/* Cart content - agar items hain to show karta hai */}
       {addedItems.length ? (
         <Grid
           container
@@ -151,7 +168,7 @@ const CartPage = () => {
           alignItems="flex-start"
           sx={{ p: 3 }}
         >
-          {/* Cart Items */}
+          {/* Cart Items Table */}
           <Grid item xs={12} md={6}>
             <Paper elevation={3} sx={{ width: "100%" }}>
               <TableContainer sx={{ maxHeight: 500 }}>
@@ -164,6 +181,7 @@ const CartPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
+                    {/* Cart items list */}
                     {addedItems.map((item) => (
                       <TableRow key={item._id}>
                         <TableCell>
@@ -175,10 +193,12 @@ const CartPage = () => {
                         <TableCell>₹{item.price}</TableCell>
                         <TableCell>
                           <Stack direction="row" gap={2} alignItems="center">
+                            {/* Add button */}
                             <IconButton onClick={() => cartItemAddHandler(item)}>
                               <AddIcon />
                             </IconButton>
                             <Typography>{item.quantity}</Typography>
+                            {/* Remove button */}
                             <IconButton onClick={() => cartItemRemoveHandler(item._id)}>
                               <RemoveIcon />
                             </IconButton>
@@ -189,6 +209,7 @@ const CartPage = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+              {/* Total amount display */}
               <Card sx={{ backgroundColor: "#2196f3", p: 2, mt: 1 }}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography color="white">Total amount:</Typography>
@@ -198,47 +219,81 @@ const CartPage = () => {
             </Paper>
           </Grid>
 
-          {/* Checkout Button */}
+          {/* Order Summary */}
           <Grid item xs={12} md={6}>
             <Paper elevation={3} sx={{ p: 3 }}>
-              <Typography variant="h6" align="center" gutterBottom>
-                Ready to Checkout?
+              <Typography variant="h6" gutterBottom>
+                Order Summary
               </Typography>
-              <Typography variant="body2" align="center" sx={{ mb: 3 }}>
-                Click the button below to complete your purchase.
-              </Typography>
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
-                onClick={handleCheckout}
-                sx={{ py: 2 }}
-              >
-                Proceed to Checkout
-              </Button>
+
+              {/* Order details */}
+              <Stack spacing={2}>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography>Items ({addedItems.length}):</Typography>
+                  <Typography>₹{totalAmount}</Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography>Shipping:</Typography>
+                  <Typography>Free</Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography variant="h6">Total:</Typography>
+                  <Typography variant="h6">₹{totalAmount}</Typography>
+                </Box>
+              </Stack>
+
+              {/* Action buttons */}
+              <Stack spacing={2} sx={{ mt: 3 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={handleCheckout}
+                  startIcon={<LocalMallIcon />}
+                >
+                  Proceed to Checkout
+                </Button>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={goBack}
+                >
+                  Continue Shopping
+                </Button>
+              </Stack>
             </Paper>
           </Grid>
         </Grid>
       ) : (
-        <Grid
-          container
-          direction="column"
+        /* Empty cart state */
+        <Box
+          display="flex"
+          flexDirection="column"
           alignItems="center"
           justifyContent="center"
-          sx={{ pt: 4 }}
+          minHeight="60vh"
+          gap={3}
         >
-          <Button variant="contained" onClick={goBack} endIcon={<LocalMallIcon />}>
-            Back to shop
+          <img src={emptyCart} alt="Empty Cart" style={{ width: '200px' }} />
+          <Typography variant="h5" color="text.secondary">
+            Your cart is empty
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={goBack}
+          >
+            Start Shopping
           </Button>
-          <img src={emptyCart} alt="empty cart" style={{ maxWidth: 300, marginTop: 16 }} />
-        </Grid>
+        </Box>
       )}
 
       {/* Order Form Dialog */}
-      <Dialog open={orderFormShow} onClose={handleCancel} maxWidth="md" fullWidth>
-        <DialogTitle>Complete Your Order</DialogTitle>
+      <Dialog open={orderFormShow} onClose={handleCancel} maxWidth="sm" fullWidth>
+        <DialogTitle>Shipping Information</DialogTitle>
         <DialogContent>
-          <Box sx={{ mt: 2 }}>
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            {/* Form fields */}
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -260,18 +315,20 @@ const CartPage = () => {
                   required
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Address"
-                  name="address"
-                  value={orderForm.address}
-                  onChange={handleOrderFormChange}
-                  multiline
-                  rows={2}
-                  required
-                />
-              </Grid>
+            </Grid>
+
+            <TextField
+              fullWidth
+              label="Address"
+              name="address"
+              value={orderForm.address}
+              onChange={handleOrderFormChange}
+              multiline
+              rows={2}
+              required
+            />
+
+            <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -292,6 +349,9 @@ const CartPage = () => {
                   required
                 />
               </Grid>
+            </Grid>
+
+            <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -310,28 +370,17 @@ const CartPage = () => {
                   value={orderForm.mobileNumber}
                   onChange={handleOrderFormChange}
                   required
-                  helperText="Enter 10-digit mobile number"
                 />
               </Grid>
             </Grid>
-            <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-              <Typography variant="h6" gutterBottom>Order Summary</Typography>
-              <Typography>Total Amount: ₹{totalAmount}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {addedItems.length} item(s) in your order
-              </Typography>
-            </Box>
-          </Box>
+          </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} color="primary">
-            Cancel
-          </Button>
+          <Button onClick={handleCancel}>Cancel</Button>
           <Button
             onClick={handlePlaceOrder}
             variant="contained"
-            color="primary"
-            disabled={orderLoading || !orderForm.firstName || !orderForm.lastName || !orderForm.address || !orderForm.city || !orderForm.country || !orderForm.zipCode || !orderForm.mobileNumber}
+            disabled={orderLoading}
           >
             {orderLoading ? 'Placing Order...' : 'Place Order'}
           </Button>

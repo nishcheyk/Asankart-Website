@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import not_found_pic from "../img/not_found.png";
 import Pagination from "@mui/material/Pagination";
@@ -12,12 +12,19 @@ import PriceRangeComponent from "../filterComponents/PriceRangeComponent";
 import BrandListComponent from "../filterComponents/BrandListComponent";
 import Loader from "../components/Loader";
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
+import { AuthContext } from "../context/AuthContext";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/cartSlice";
+import { useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
 
 const pageSize = 10;
 
+// HomePage component - main landing page jo products display karta hai
 const HomePage = () => {
-  const [productList, setProductList] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
+  // State variables - different data store karne ke liye
+  const [productList, setProductList] = useState([]); // All products ka array
+  const [searchValue, setSearchValue] = useState(""); // Search input
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [minPriceDinamic, setMinPriceDinamic] = useState(0);
@@ -35,48 +42,35 @@ const HomePage = () => {
   });
   const [token, setToken] = useState();
   const [isAdmin, setIsAdmin] = useState();
+  const [filteredProducts, setFilteredProducts] = useState([]); // Filtered products
+  const [error, setError] = useState(null); // Error state
+  const [selectedCategory, setSelectedCategory] = useState(""); // Selected category
+  const [selectedBrand, setSelectedBrand] = useState(""); // Selected brand
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 }); // Price filter
+  const [sortBy, setSortBy] = useState(""); // Sort option
 
+  // Context se user data fetch karta hai
+  const { token, isAdmin } = useContext(AuthContext);
+  const dispatch = useDispatch(); // Redux dispatch function
+  const navigate = useNavigate(); // Navigation ke liye
+
+  // Component mount hone par products fetch karta hai
   useEffect(() => {
-    const fetchMeta = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/product/meta");
-        setAllBrandList(res.data.brands.map(b => ({ value: b, checked: false })));
-        setMinPrice(res.data.minPrice);
-        setMaxPrice(res.data.maxPrice);
-        setMinPriceDinamic(res.data.minPrice);
-        setMaxPriceDinamic(res.data.maxPrice);
-        setPriceRange([res.data.minPrice, res.data.maxPrice]);
-      } catch (e) { console.log(e); }
-    };
-    fetchMeta();
+    fetchProducts();
   }, []);
 
-  const [originalData, setOriginalData] = useState([]);
-  const [originalBrandList, setOriginalBrandList] = useState([]);
-
-  useEffect(() => {
-    setToken(localStorage.getItem("token"));
-    setIsAdmin(localStorage.getItem("isAdmin"));
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    getProduct();
-  }, []);
-
-  const getProduct = async () => {
+  // Products fetch karne ka function - backend se data get karta hai
+  const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/product");
+      setLoading(true);
+      const response = await axios.get("http://localhost:5000/product/");
       setProductList(response.data);
-      setOriginalData(response.data);
-
-      let min = Math.min(...response.data.map((val) => val.price));
-      let max = Math.max(...response.data.map((val) => val.price));
-      setMinPrice(min);
-      setMaxPrice(max);
-      setMinPriceDinamic(min);
-      setMaxPriceDinamic(max);
-      setPriceRange([min, max]);
+      setFilteredProducts(response.data);
+      setMinPrice(response.data.minPrice);
+      setMaxPrice(response.data.maxPrice);
+      setMinPriceDinamic(response.data.minPrice);
+      setMaxPriceDinamic(response.data.maxPrice);
+      setPriceRange([response.data.minPrice, response.data.maxPrice]);
 
       let brand_array = response.data.map((item) => item.brand);
       let uniqbrandlist = [...new Set(brand_array)];
@@ -85,76 +79,64 @@ const HomePage = () => {
         checked: false,
       }));
 
-      setOriginalBrandList(uniqChecklist);
       setAllBrandList(uniqChecklist);
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      setError("Failed to fetch products");
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleCatChange = (value) => {
-    setCategory(value);
-    applyAllFilters(value, searchValue, sortValue, minPriceDinamic, maxPriceDinamic, allbrandList);
-  };
-
+  // Search functionality - products ko search term ke hisab se filter karta hai
   const handleSearch = (value) => {
     setSearchValue(value);
     applyAllFilters(category, value, sortValue, minPriceDinamic, maxPriceDinamic, allbrandList);
   };
 
+  // Category filter - products ko category ke hisab se filter karta hai
+  const handleCatChange = (value) => {
+    setCategory(value);
+    applyAllFilters(value, searchValue, sortValue, minPriceDinamic, maxPriceDinamic, allbrandList);
+  };
+
+  // Brand filter - products ko brand ke hisab se filter karta hai
+  const handleBrandFilter = (brand) => {
+    setSelectedBrand(brand);
+    applyAllFilters(category, searchValue, sortValue, minPriceDinamic, maxPriceDinamic, allbrandList);
+  };
+
+  // Price range filter - products ko price range ke hisab se filter karta hai
+  const handlePriceFilter = (range) => {
+    setPriceRange(range);
+    setMinPriceDinamic(range.min);
+    setMaxPriceDinamic(range.max);
+    applyAllFilters(category, searchValue, sortValue, range.min, range.max, allbrandList);
+  };
+
+  // Sort functionality - products ko different criteria ke hisab se sort karta hai
   const handleSort = (value) => {
     setSortValue(value);
     applyAllFilters(category, searchValue, value, minPriceDinamic, maxPriceDinamic, allbrandList);
   };
 
-  const handlePriceRange = (event, newValue) => {
-    setPriceRange(newValue);
-    setMinPriceDinamic(newValue[0]);
-    setMaxPriceDinamic(newValue[1]);
-    applyAllFilters(category, searchValue, sortValue, newValue[0], newValue[1], allbrandList);
-  };
-
-  const handleMinPrice = (event) => {
-    const newMinPrice = parseInt(event.target.value);
-    setMinPriceDinamic(newMinPrice);
-    applyAllFilters(category, searchValue, sortValue, newMinPrice, maxPriceDinamic, allbrandList);
-  };
-
-  const handleMaxPrice = (event) => {
-    const newMaxPrice = parseInt(event.target.value);
-    setMaxPriceDinamic(newMaxPrice);
-    applyAllFilters(category, searchValue, sortValue, minPriceDinamic, newMaxPrice, allbrandList);
-  };
-
-  const handleChanges = (index) => {
-    const updatedBrands = [...allbrandList];
-    updatedBrands[index].checked = !updatedBrands[index].checked;
-    setAllBrandList(updatedBrands);
-    applyAllFilters(category, searchValue, sortValue, minPriceDinamic, maxPriceDinamic, updatedBrands);
-  };
-
+  // All filters apply karne ka function - search, category, brand, price, sort
   const applyAllFilters = (cat, search, sort, minPrice, maxPrice, brands) => {
-    let filteredData = [...originalData];
+    let filteredData = [...productList];
 
-    // Apply category filter
-    if (cat && cat !== "all") {
-      filteredData = filteredData.filter((item) => item.category === cat);
-    }
-
-    // Apply search filter
+    // Search filter - product name mein search term check karta hai
     if (search && search !== "") {
       filteredData = filteredData.filter((item) =>
         item.title.toLowerCase().includes(search.toLowerCase())
       );
     }
 
-    // Apply price range filter
-    filteredData = filteredData.filter(
-      (item) => item.price >= minPrice && item.price <= maxPrice
-    );
+    // Category filter - product category check karta hai
+    if (cat && cat !== "all") {
+      filteredData = filteredData.filter((item) => item.category === cat);
+    }
 
-    // Apply brand filter
+    // Brand filter - product brand check karta hai
     const selectedBrands = brands
       .filter((brand) => brand.checked)
       .map((b) => b.value);
@@ -164,7 +146,12 @@ const HomePage = () => {
       );
     }
 
-    // Apply sorting
+    // Price filter - product price range check karta hai
+    filteredData = filteredData.filter(
+      (item) => item.price >= minPrice && item.price <= maxPrice
+    );
+
+    // Sort functionality - different sorting options
     if (sort && sort !== "Select value") {
       if (sort === "ascendingprice")
         filteredData.sort((a, b) => a.price - b.price);
@@ -180,29 +167,28 @@ const HomePage = () => {
         filteredData.sort((a, b) => b.discountPercentage - a.discountPercentage);
     }
 
-    setProductList(filteredData);
+    setFilteredProducts(filteredData);
   };
 
-  const handleClearFilters = () => {
-    setSearchValue("");
-    setCategory("all");
-    setSortValue("Select value");
-    setMinPriceDinamic(minPrice);
-    setMaxPriceDinamic(maxPrice);
-    setPriceRange([minPrice, maxPrice]);
-    setAllBrandList(originalBrandList.map((item) => ({ ...item, checked: false })));
-    setProductList(originalData);
+  // Add to cart function - product ko cart mein add karta hai
+  const handleAddToCart = (product) => {
+    dispatch(addToCart({ product, amount: 1 })); // Redux action dispatch karta hai
   };
 
-  const handlePagination = (event, page) => {
-    const from = (page - 1) * pageSize;
-    const to = (page - 1) * pageSize + pageSize;
-    setPagination({ ...pagination, from: from, to: to });
+  // Product details page par navigate karne ka function
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
   };
 
-  useEffect(() => {
-    setPagination({ ...pagination, count: productList.length });
-  }, [pagination.from, pagination.to, productList, pagination.count]);
+  // Loading state - spinner show karta hai
+  if (loading) {
+    return <Loader />;
+  }
+
+  // Error state - error message show karta hai
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
 
   return (
     <div className="homepage-container">
@@ -243,7 +229,7 @@ const HomePage = () => {
   <Loader />
 ) : (
   <div className="products">
-    {productList.length !== 0 ? (
+    {filteredProducts.length !== 0 ? (
       isAdmin === "true" ? (
         <DragDropContext
           onDragEnd={async (result) => {
@@ -294,7 +280,7 @@ const HomePage = () => {
           </Droppable>
         </DragDropContext>
       ) : (
-        productList
+        filteredProducts
           .slice(pagination.from, pagination.to)
           .map((product) => (
             <ProductCard
@@ -311,7 +297,7 @@ const HomePage = () => {
     )}
     <div className="pagination">
       <Pagination
-        count={Math.ceil(pagination.count / pageSize)}
+        count={Math.ceil(filteredProducts.length / pageSize)}
         onChange={(e, value) => handlePagination(e, value)}
         sx={{
           "& .MuiPaginationItem-root": { color: "white" },

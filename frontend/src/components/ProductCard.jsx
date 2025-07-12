@@ -1,387 +1,324 @@
-import React, { useState, useEffect, useRef } from "react";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
-import CardActions from "@mui/material/CardActions";
-import Rating from "@mui/material/Rating";
-import Stack from "@mui/material/Stack";
-import { Button, Box } from "@mui/material";
-import { useNavigate } from "react-router";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import RateReviewIcon from "@mui/icons-material/RateReview";
-import { useMediaQuery } from "@mui/material";
-
-import { addToCart, removeFromCart } from "../store/cart/cartActions";
+import React, { useState, useContext } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/authContext";
+import { addToCart } from "../store/cart/cartActions";
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Button,
+  Rating,
+  Box,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Stack,
+} from "@mui/material";
+import {
+  AddShoppingCart as AddShoppingCartIcon,
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 import axios from "axios";
 
-const ProductCard = (props) => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [product, setProduct] = useState(props.product);
-  const [token, setToken] = useState();
-  const [isAdmin, setIsAdmin] = useState();
-  const amountInputRef = useRef();
+// ProductCard component - individual product display card
+const ProductCard = ({ product, isAdmin = false, onEdit, onDelete, onReorder }) => {
+  const navigate = useNavigate(); // Navigation ke liye
+  const dispatch = useDispatch(); // Redux dispatch function
+  const { token, isAdmin: userIsAdmin } = useContext(AuthContext); // Auth context
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [hovered, setHovered] = useState(false);
-  let imageInterval = useRef(null);
+  // Local state variables
+  const [showDetails, setShowDetails] = useState(false); // Product details dialog
+  const [loading, setLoading] = useState(false); // Loading state
+  const [deleteConfirm, setDeleteConfirm] = useState(false); // Delete confirmation dialog
 
-  const isMobile = useMediaQuery("(max-width:600px)");
-
-  useEffect(() => {
-    setToken(localStorage.getItem("token"));
-    setIsAdmin(localStorage.getItem("isAdmin"));
-  }, []);
-
-  useEffect(() => {
-    if (hovered && product?.images?.length > 1) {
-      imageInterval.current = setInterval(() => {
-        setCurrentImageIndex(
-          (prevIndex) => (prevIndex + 1) % product.images.length
-        );
-      }, 1500);
-    } else {
-      clearInterval(imageInterval.current);
-      imageInterval.current = null;
-      setCurrentImageIndex(0);
-    }
-    return () => clearInterval(imageInterval.current);
-  }, [hovered, product?.images]);
-
-  const handleUpdate = (id) => {
-    navigate("/update/" + id);
+  // Product details dialog open karne ka function
+  const handleShowDetails = () => {
+    setShowDetails(true);
   };
 
-  const handleDelete = async (id) => {
-    try {
-      const response = await axios.delete(
-        "http://localhost:5000/product/delete/" + id
-      );
-      if (
-        response.data === "Product deleted successfully!" ||
-        response.data === "Product deleted!"
-      ) {
-        if (props.getProduct) props.getProduct();
-      }
-    } catch (e) {
-      console.log(e);
-    }
+  // Product details dialog close karne ka function
+  const handleCloseDetails = () => {
+    setShowDetails(false);
   };
 
-  const handleAddToCart = (product) => {
+  // Cart mein product add karne ka function
+  const handleAddToCart = () => {
+    if (!token) {
+      navigate('/login'); // Agar logged in nahi hai to login page
+      return;
+    }
+
     const product_item = {
       product: product,
-      amount: amountInputRef.current.value,
+      amount: 1, // Default quantity 1
     };
-    dispatch(addToCart(product_item));
+    dispatch(addToCart(product_item)); // Redux action dispatch karta hai
   };
 
+  // Product details page par navigate karne ka function
+  const handleProductClick = () => {
+    navigate(`/product/${product._id}`);
+  };
+
+  // Product edit karne ka function - admin ke liye
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(product);
+    }
+  };
+
+  // Product delete karne ka function - admin ke liye
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this product?')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Backend se product delete karta hai
+      await axios.delete(`http://localhost:5000/product/${product._id}`);
+
+      if (onDelete) {
+        onDelete(product._id); // Parent component ko notify karta hai
+      }
+
+      alert('Product deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product. Please try again.');
+    } finally {
+      setLoading(false);
+      setDeleteConfirm(false);
+    }
+  };
+
+  // Product reorder karne ka function - admin ke liye
+  const handleReorder = () => {
+    if (onReorder) {
+      onReorder(product);
+    }
+  };
+
+  // Average rating calculate karta hai reviews se
+  const averageRating = product.reviews && product.reviews.length > 0
+    ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length
+    : 0;
+
   return (
-    <Card
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column", md: "row" },
-        alignItems: { xs: "stretch", md: "center" },
-        justifyContent: "space-between",
-        gap: { xs: 1.5, md: 3 },
-        width: "100%",
-        background: "linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%)",
-        borderRadius: "16px",
-        p: { xs: 1.5, sm: 2.5 },
-        my: 1.5,
-        minHeight: { xs: "auto", md: 220 },
-        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
-        border: "1px solid rgba(255, 255, 255, 0.3)",
-        transition: "all 0.3s ease",
-        "&:hover": {
-          transform: "translateY(-2px)",
-          boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
-        },
-      }}
-    >
-      {/* Image Section */}
+    <>
+      {/* Product Card */}
       <Card
         sx={{
-          width: { xs: "100%", sm: 280, md: 280 },
-          height: { xs: 220, sm: 220, md: 220 },
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          m: { xs: "auto", md: 0 },
-          cursor: "pointer",
-          flexShrink: 0,
-          borderRadius: "12px",
-          background: "white",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-          transition: "all 0.3s ease",
-          "&:hover": {
-            transform: "scale(1.02)",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-          },
+          maxWidth: 345,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'transform 0.2s',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: 3,
+          }
         }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onClick={() => navigate(`/product/${product._id}`)}
       >
+        {/* Product Image */}
         <CardMedia
           component="img"
-          image={product?.images?.[currentImageIndex] || product?.thumbnail}
-          alt="Product image"
-          sx={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            transition: "opacity 0.5s ease-in-out",
-            backgroundColor: "transparent",
-            filter: "drop-shadow(0 0 0 transparent)",
-            padding: "8px",
-          }}
+          height="200"
+          image={product.image || product.images}
+          alt={product.name || product.title}
+          sx={{ objectFit: 'cover', cursor: 'pointer' }}
+          onClick={handleProductClick} // Image click par product details
         />
-      </Card>
 
-      {/* Text Content */}
-      <Card
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          minHeight: { xs: "auto", md: 220 },
-          background: "transparent",
-          boxShadow: "none",
-          minWidth: { md: "300px" },
-        }}
-      >
-        <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, flex: 1 }}>
-          <Stack spacing={1.5}>
-            <Typography
-              variant="h6"
-              sx={{
-                cursor: "pointer",
-                fontSize: { xs: "1.1rem", sm: "1.3rem" },
-                fontWeight: 600,
-                lineHeight: 1.3,
-                color: "#2c3e50",
-                transition: "color 0.2s ease",
-                "&:hover": {
-                  color: "#3498db",
-                },
-              }}
-              onClick={() => navigate(`/product/${product._id}`)}
-            >
-              {product.title}
+        {/* Product Content */}
+        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          {/* Product Title */}
+          <Typography
+            gutterBottom
+            variant="h6"
+            component="div"
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { color: 'primary.main' }
+            }}
+            onClick={handleProductClick}
+          >
+            {product.name || product.title}
+          </Typography>
+
+          {/* Product Price */}
+          <Typography variant="h6" color="primary" gutterBottom>
+            ₹{product.price}
+          </Typography>
+
+          {/* Product Rating */}
+          <Box display="flex" alignItems="center" mb={1}>
+            <Rating
+              value={averageRating}
+              readOnly
+              precision={0.5}
+              size="small"
+            />
+            <Typography variant="body2" color="text.secondary" ml={1}>
+              ({product.reviews?.length || 0} reviews)
             </Typography>
-            {!isMobile && (
-              <>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    fontSize: { xs: "0.9rem", sm: "1rem" },
-                    maxHeight: { xs: "70px", sm: "90px" },
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: { xs: 3, sm: 4 },
-                    WebkitBoxOrient: "vertical",
-                    lineHeight: 1.5,
-                    color: "#5a6c7d",
-                  }}
-                >
-                  {product.description}
-                </Typography>
-                <Stack direction="row" alignItems="center" spacing={1.5}>
-                  <Rating
-                    name="half-rating-read"
-                    value={product.rating}
-                    precision={0.5}
-                    readOnly
-                    size="small"
-                    sx={{
-                      "& .MuiRating-iconFilled": {
-                        color: "#f39c12",
-                      },
-                      "& .MuiRating-iconHover": {
-                        color: "#f39c12",
-                      },
-                    }}
-                  />
-                  <Typography
-                    variant="body2"
-                    color="text.primary"
-                    sx={{
-                      fontWeight: 500,
-                      color: "#34495e",
-                    }}
-                  >
-                    {product.rating}
-                  </Typography>
-                  {product.reviews && product.reviews.length > 0 && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        fontSize: "0.7rem",
-                        color: "#7f8c8d",
-                      }}
-                    >
-                      ({product.reviews.length} reviews)
-                    </Typography>
-                  )}
-                </Stack>
-                <Stack direction="column" spacing={0.8}>
-                  <Typography
-                    variant="h6"
-                    color="text.primary"
-                    sx={{
-                      fontSize: { xs: "1.2rem", sm: "1.4rem" },
-                      fontWeight: 700,
-                      color: "#e74c3c",
-                    }}
-                  >
-                    ₹ {product.price}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.primary"
-                    sx={{
-                      fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                      color: "#27ae60",
-                      fontWeight: 500,
-                    }}
-                  >
-                    Save {product.discountPercentage}% off
-                  </Typography>
-                </Stack>
-              </>
-            )}
-          </Stack>
-        </CardContent>
-      </Card>
+          </Box>
 
-      {/* Cart Actions - Now positioned on the right */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "row", sm: "column" },
-          justifyContent: { xs: "space-between", sm: "center" },
-          alignItems: { xs: "center", sm: "center" },
-          gap: { xs: 1.5, sm: 1.5 },
-          p: { xs: 1.5, sm: 2.5 },
-          width: { xs: "100%", md: "auto" },
-          flexShrink: 0,
-          minWidth: { md: "220px" },
-          maxWidth: { md: "250px" },
-        }}
-      >
-        {token && isAdmin === "true" ? (
-          <Stack
-            direction={{ xs: "row", sm: "column" }}
-            spacing={1.5}
-            sx={{ width: { xs: "100%", sm: "auto" } }}
+          {/* Product Description */}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mb: 2,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
           >
-            <Button
-              color="primary"
-              variant="contained"
+            {product.description}
+          </Typography>
+
+          {/* Product Category */}
+          {product.category && (
+            <Chip
+              label={product.category}
               size="small"
-              onClick={() => handleUpdate(product._id)}
-              sx={{
-                fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                px: { xs: 1.5, sm: 2.5 },
-                borderRadius: "8px",
-                fontWeight: 600,
-                background: "linear-gradient(135deg, #3498db, #2980b9)",
-                "&:hover": {
-                  background: "linear-gradient(135deg, #2980b9, #1f5f8b)",
-                },
-              }}
-            >
-              Update
-            </Button>
+              color="secondary"
+              sx={{ mb: 1, alignSelf: 'flex-start' }}
+            />
+          )}
+
+          {/* Action Buttons */}
+          <Box sx={{ mt: 'auto', display: 'flex', gap: 1 }}>
+            {/* View Details Button */}
             <Button
-              color="error"
-              variant="contained"
               size="small"
-              onClick={() => handleDelete(product._id)}
-              sx={{
-                fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                px: { xs: 1.5, sm: 2.5 },
-                borderRadius: "8px",
-                fontWeight: 600,
-                background: "linear-gradient(135deg, #e74c3c, #c0392b)",
-                "&:hover": {
-                  background: "linear-gradient(135deg, #c0392b, #a93226)",
-                },
-              }}
+              startIcon={<VisibilityIcon />}
+              onClick={handleShowDetails}
+              variant="outlined"
             >
-              Delete
+              Details
             </Button>
-          </Stack>
-        ) : (
-          <Stack
-            direction={{ xs: "row", sm: "column" }}
-            alignItems="center"
-            spacing={1.5}
-            sx={{ width: { xs: "100%", sm: "auto" } }}
-          >
+
+            {/* Add to Cart Button */}
             <Button
+              size="small"
+              startIcon={<AddShoppingCartIcon />}
+              onClick={handleAddToCart}
               variant="contained"
               color="primary"
-              endIcon={<AddShoppingCartIcon />}
-              onClick={() => handleAddToCart(product)}
-              size="small"
-              sx={{
-                borderRadius: "25px",
-                width: { xs: "auto", sm: "100%" },
-                fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                px: { xs: 2, sm: 2.5 },
-                fontWeight: 600,
-                background: "linear-gradient(135deg, #27ae60, #2ecc71)",
-                boxShadow: "0 2px 8px rgba(39, 174, 96, 0.3)",
-                "&:hover": {
-                  background: "linear-gradient(135deg, #2ecc71, #27ae60)",
-                  boxShadow: "0 4px 12px rgba(39, 174, 96, 0.4)",
-                  transform: "translateY(-1px)",
-                },
-              }}
+              sx={{ flexGrow: 1 }}
             >
               Add to Cart
             </Button>
-            <TextField
-              inputRef={amountInputRef}
-              size="small"
-              sx={{
-                width: { xs: 90, sm: 110 },
-                "& .MuiInputBase-input": {
-                  fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                },
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#3498db",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#3498db",
-                  },
-                },
-              }}
-              label="Qty"
-              id={"amount_" + product._id}
-              type="number"
-              inputProps={{ min: 1, max: 10, step: 1 }}
-              defaultValue={1}
-              onChange={(e) => {
-                if (e.target.value > 5) e.target.value = 5;
-              }}
-            />
-          </Stack>
-        )}
-      </Box>
-    </Card>
+          </Box>
+
+          {/* Admin Actions - sirf admin ke liye */}
+          {isAdmin && (
+            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={handleEdit}
+                title="Edit Product"
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                size="small"
+                color="error"
+                onClick={handleDelete}
+                title="Delete Product"
+                disabled={loading}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Product Details Dialog */}
+      <Dialog
+        open={showDetails}
+        onClose={handleCloseDetails}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {product.name || product.title}
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3}>
+            {/* Product Image */}
+            <Grid item xs={12} md={6}>
+              <img
+                src={product.image || product.images}
+                alt={product.name || product.title}
+                style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+              />
+            </Grid>
+
+            {/* Product Details */}
+            <Grid item xs={12} md={6}>
+              <Stack spacing={2}>
+                <Typography variant="h5" color="primary">
+                  ₹{product.price}
+                </Typography>
+
+                <Box display="flex" alignItems="center">
+                  <Rating value={averageRating} readOnly precision={0.5} />
+                  <Typography variant="body2" ml={1}>
+                    ({product.reviews?.length || 0} reviews)
+                  </Typography>
+                </Box>
+
+                <Typography variant="body1">
+                  {product.description}
+                </Typography>
+
+                {product.category && (
+                  <Chip label={product.category} color="secondary" />
+                )}
+
+                {product.brand && (
+                  <Typography variant="body2" color="text.secondary">
+                    Brand: {product.brand}
+                  </Typography>
+                )}
+
+                {product.stock && (
+                  <Typography variant="body2" color="text.secondary">
+                    Stock: {product.stock} units
+                  </Typography>
+                )}
+              </Stack>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDetails}>Close</Button>
+          <Button
+            onClick={handleAddToCart}
+            variant="contained"
+            color="primary"
+            startIcon={<AddShoppingCartIcon />}
+          >
+            Add to Cart
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

@@ -1,26 +1,41 @@
-const emailRegExp =
-  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+// Authentication utility functions - login/logout ke liye helper functions
 
-export const isNotEmpty = (value) => {
-  if (value.length > 2 && value !== "" && value !== null && value !== undefined)
-    return true;
-  else return false;
+// User ko login karne ka function - token aur user data store karta hai
+export const loginUser = (token, userId, username, isAdmin) => {
+  // LocalStorage mein user data save karta hai
+  localStorage.setItem("token", token);
+  localStorage.setItem("userId", userId);
+  localStorage.setItem("username", username);
+  localStorage.setItem("isAdmin", isAdmin);
 };
 
-export const messageHasLength = (mess) => {
-  if (mess.length > 10) return true;
-  else return false;
+// User ko logout karne ka function - sab data clear karta hai
+export const logoutUser = () => {
+  // LocalStorage se sab data remove karta hai
+  localStorage.removeItem("token");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("username");
+  localStorage.removeItem("isAdmin");
 };
 
-export const numberCheck = (num) => {
-  if (num.length < 7) return false;
-  for (let n of num) {
-    if (isNaN(Number(n))) return false;
-  }
-  return true;
+// Check karta hai ki user logged in hai ya nahi
+export const isLoggedIn = () => {
+  const token = localStorage.getItem("token");
+  return token !== null; // Token hai to logged in hai
 };
 
-export const validateEmail = (mail) => {
-  if (emailRegExp.test(mail.toLowerCase())) return true;
-  else return false;
+// Check karta hai ki user admin hai ya nahi
+export const isAdminUser = () => {
+  const isAdmin = localStorage.getItem("isAdmin");
+  return isAdmin === "true"; // Admin hai to true return karta hai
+};
+
+// User ka current data get karne ka function
+export const getCurrentUser = () => {
+  return {
+    token: localStorage.getItem("token"),
+    userId: localStorage.getItem("userId"),
+    username: localStorage.getItem("username"),
+    isAdmin: localStorage.getItem("isAdmin") === "true"
+  };
 };

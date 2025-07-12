@@ -1,126 +1,107 @@
-import React, { memo } from "react";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import Slider from "@mui/material/Slider";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import { AttachMoney } from "@mui/icons-material";
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Typography, Slider } from '@mui/material';
 
-const PriceRangeComponent = memo((props) => {
+// PriceRangeComponent - price range filter karne ke liye
+const PriceRangeComponent = ({ onPriceRangeChange, maxPrice = 10000 }) => {
+  // Price range state
+  const [priceRange, setPriceRange] = useState([0, maxPrice]);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPriceInput, setMaxPriceInput] = useState(maxPrice);
+
+  // Price range change handle karne ka function
+  const handlePriceRangeChange = (event, newValue) => {
+    setPriceRange(newValue);
+    setMinPrice(newValue[0]);
+    setMaxPriceInput(newValue[1]);
+  };
+
+  // Min price input change handle karne ka function
+  const handleMinPriceChange = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    setMinPrice(value);
+    setPriceRange([value, priceRange[1]]);
+  };
+
+  // Max price input change handle karne ka function
+  const handleMaxPriceChange = (e) => {
+    const value = parseInt(e.target.value) || maxPrice;
+    setMaxPriceInput(value);
+    setPriceRange([priceRange[0], value]);
+  };
+
+  // Price range change hone par parent ko notify karta hai
+  useEffect(() => {
+    onPriceRangeChange(priceRange);
+  }, [priceRange, onPriceRangeChange]);
+
   return (
-    <div className="filter-section">
-      <Typography className="filter-section-title">
-        Price Range (₹)
+    <Box sx={{ width: '100%', maxWidth: '300px' }}>
+      <Typography variant="subtitle1" gutterBottom>
+        Price Range
       </Typography>
 
-      <Box sx={{ mb: 0.5 }}>
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          gap={1}
-          sx={{ mb: 0.5 }}
-        >
-          <TextField
-            label="Min ₹"
-            variant="outlined"
-            size="small"
-            value={props.minPriceDinamic}
-            onChange={props.handleMinPrice}
-            InputProps={{
-              startAdornment: <AttachMoney sx={{ color: 'text.secondary', fontSize: { xs: 12, sm: 14 } }} />,
-            }}
-            sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
-              '& .MuiOutlinedInput-root': {
-                borderRadius: { xs: '4px', sm: '6px' },
-                fontSize: { xs: '12px', sm: '14px' },
-                '&:hover fieldset': {
-                  borderColor: '#667eea',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#764ba2',
-                },
-              },
-            }}
-          />
-          <TextField
-            label="Max ₹"
-            variant="outlined"
-            size="small"
-            value={props.maxPriceDinamic}
-            onChange={props.handleMaxPrice}
-            InputProps={{
-              startAdornment: <AttachMoney sx={{ color: 'text.secondary', fontSize: { xs: 12, sm: 14 } }} />,
-            }}
-            sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
-              '& .MuiOutlinedInput-root': {
-                borderRadius: { xs: '4px', sm: '6px' },
-                fontSize: { xs: '12px', sm: '14px' },
-                '&:hover fieldset': {
-                  borderColor: '#667eea',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#764ba2',
-                },
-              },
-            }}
-          />
-        </Stack>
-
+      {/* Price Range Slider */}
+      <Box sx={{ px: 2, mb: 3 }}>
         <Slider
-          min={props.minPrice}
-          max={props.maxPrice}
-          value={props.priceRange}
-          onChange={props.handlePriceRange}
+          value={priceRange}
+          onChange={handlePriceRangeChange}
           valueLabelDisplay="auto"
-          valueLabelFormat={(value) => `₹${value}`}
+          min={0}
+          max={maxPrice}
+          step={100}
           sx={{
-            color: '#667eea',
-            height: 2,
             '& .MuiSlider-thumb': {
-              height: 12,
-              width: 12,
-              backgroundColor: '#764ba2',
-              border: '1px solid white',
-              boxShadow: '0 1px 4px rgba(118, 75, 162, 0.4)',
-              '&:hover, &.Mui-focusVisible': {
-                boxShadow: '0 2px 8px rgba(118, 75, 162, 0.6)',
-              },
+              backgroundColor: 'primary.main',
             },
             '& .MuiSlider-track': {
-              background: 'linear-gradient(90deg, #667eea, #764ba2)',
-              border: 'none',
+              backgroundColor: 'primary.main',
             },
             '& .MuiSlider-rail': {
-              backgroundColor: 'rgba(102, 126, 234, 0.2)',
-            },
-            '& .MuiSlider-valueLabel': {
-              backgroundColor: '#764ba2',
-              borderRadius: '3px',
-              fontSize: '12px',
-              fontWeight: 600,
+              backgroundColor: 'grey.300',
             },
           }}
         />
-
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          mt: 0.1,
-          px: 0.1
-        }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '11px', sm: '12px' } }}>
-            ₹{props.minPrice}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '11px', sm: '12px' } }}>
-            ₹{props.maxPrice}
-          </Typography>
-        </Box>
       </Box>
-    </div>
-  );
-});
 
-PriceRangeComponent.displayName = 'PriceRangeComponent';
+      {/* Price Input Fields */}
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <TextField
+          label="Min Price"
+          type="number"
+          value={minPrice}
+          onChange={handleMinPriceChange}
+          size="small"
+          sx={{ width: '120px' }}
+          inputProps={{
+            min: 0,
+            max: priceRange[1],
+          }}
+        />
+
+        <Typography variant="body2" color="text.secondary">
+          to
+        </Typography>
+
+        <TextField
+          label="Max Price"
+          type="number"
+          value={maxPriceInput}
+          onChange={handleMaxPriceChange}
+          size="small"
+          sx={{ width: '120px' }}
+          inputProps={{
+            min: priceRange[0],
+            max: maxPrice,
+          }}
+        />
+      </Box>
+
+      {/* Price Display */}
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        ₹{priceRange[0]} - ₹{priceRange[1]}
+      </Typography>
+    </Box>
+  );
+};
 
 export default PriceRangeComponent;

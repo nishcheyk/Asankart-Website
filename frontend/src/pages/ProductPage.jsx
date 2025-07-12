@@ -23,36 +23,44 @@ import Loader from '../components/Loader';
 import axios from 'axios';
 import Footer from '../components/Footer';
 
+// ProductPage component - individual product ka detailed view
 const ProductPage = () => {
+  // URL se product ID extract karta hai
   const { id } = useParams();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { token } = useContext(AuthContext);
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [related, setRelated] = useState([]);
-  const [reviewText, setReviewText] = useState('');
-  const [reviewRating, setReviewRating] = useState(5);
-  const [canReview, setCanReview] = useState(false);
-  const [reviewLoading, setReviewLoading] = useState(false);
-  const [confirmShow, setConfirmShow] = useState(false);
-  const [purchaseStatus, setPurchaseStatus] = useState(null);
-  const amountInputRef = useRef();
+  const navigate = useNavigate(); // Navigation ke liye
+  const dispatch = useDispatch(); // Redux dispatch function
+  const { token } = useContext(AuthContext); // Authentication context
 
+  // State variables - different data store karne ke liye
+  const [product, setProduct] = useState(null); // Current product data
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
+  const [related, setRelated] = useState([]); // Related products
+  const [reviewText, setReviewText] = useState(''); // Review text input
+  const [reviewRating, setReviewRating] = useState(5); // Review rating
+  const [canReview, setCanReview] = useState(false); // Can user review
+  const [reviewLoading, setReviewLoading] = useState(false); // Review submit loading
+  const [confirmShow, setConfirmShow] = useState(false); // Checkout confirmation dialog
+  const [purchaseStatus, setPurchaseStatus] = useState(null); // Purchase status
+
+  const amountInputRef = useRef(); // Quantity input reference
+
+  // Component mount hone par product data fetch karta hai
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        // Backend se product data fetch karta hai
         const res = await fetch(`http://localhost:5000/product/${id}`);
         if (!res.ok) throw new Error('Product not found');
         const data = await res.json();
         setProduct(data);
 
+        // Related products fetch karta hai same category se
         if (data.category) {
           const relRes = await fetch(`http://localhost:5000/product?category=${encodeURIComponent(data.category)}`);
           if (relRes.ok) {
             const relData = await relRes.json();
-            // Filter out current product and limit to 6 related products
+            // Current product ko filter out karta hai aur 6 related products limit karta hai
             setRelated(relData.filter(p => p._id !== data._id).slice(0, 6));
           }
         }
@@ -65,87 +73,64 @@ const ProductPage = () => {
     fetchProduct();
   }, [id]);
 
-  // Check if user can review this product
+  // Check karta hai ki user review kar sakta hai ya nahi
   useEffect(() => {
     const checkReviewEligibility = async () => {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
+      const userName = localStorage.getItem("username");
 
-      if (!token || !userId) {
+      // Agar user logged in nahi hai to review nahi kar sakta
+      if (!token || !userId || !userName) {
         setCanReview(false);
         return;
       }
 
-      try {
-        const orders = await axios.get(`http://localhost:5000/order/${userId}`);
-        const userOrders = orders.data;
+      // Check karta hai ki user ne already review diya hai ya nahi
+      const existingReview = product?.reviews?.find(review =>
+        review.user === userId || review.userName === userName
+      );
 
-        // Check if user has any delivered orders for this product
-        let hasDeliveredOrder = false;
-        let hasAlreadyReviewed = false;
-
-        for (const order of userOrders) {
-          if (order.orderStatus === "Delivered") {
-            const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items);
-
-            for (const item of items) {
-              const itemId = item._id || item.id || item;
-              const productId = id;
-
-              if (itemId === productId) {
-                hasDeliveredOrder = true;
-                break;
-              }
-            }
-          }
-        }
-
-        // Check if user has already reviewed this product
-        const existingReview = product.reviews?.find(review =>
-          review.user === userId || review.userName === localStorage.getItem("username")
-        );
-
-        hasAlreadyReviewed = !!existingReview;
-
-        setCanReview(hasDeliveredOrder && !hasAlreadyReviewed);
-      } catch (error) {
-        console.error("Error checking review eligibility:", error);
-        setCanReview(false);
-      }
+      setCanReview(!existingReview); // Agar review nahi diya hai to true
     };
 
     if (product) {
-    checkReviewEligibility();
+      checkReviewEligibility();
     }
   }, [id, product]);
 
+  // Cart mein product add karne ka function
   const handleAddToCart = () => {
     const product_item = {
       product: product,
-      amount: amountInputRef.current.value || 1,
+      amount: amountInputRef.current.value || 1, // Quantity input se value ya default 1
     };
-    dispatch(addToCart(product_item));
+    dispatch(addToCart(product_item)); // Redux action dispatch karta hai
     alert('Added to cart!');
   };
 
+  // Checkout function - cart page par navigate karta hai
   const handleCheckout = () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate('/login');
+      navigate('/login'); // Agar logged in nahi hai to login page
     } else {
-      setConfirmShow(true);
+      setConfirmShow(true); // Confirmation dialog show karta hai
     }
   };
 
+  // Cancel checkout - dialog close karta hai
   const handleCancel = () => {
     setConfirmShow(false);
   };
 
+  // Confirm checkout - cart page par navigate karta hai
   const handleConfirm = async () => {
     setConfirmShow(false);
     navigate('/cart');
   };
 
+  // Review submit karne ka function
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     setReviewLoading(true);
@@ -154,6 +139,7 @@ const ProductPage = () => {
       const userId = localStorage.getItem("userId");
       const userName = localStorage.getItem("username") || "Anonymous";
 
+      // Backend ko review data bhejta hai
       const res = await axios.post(`http://localhost:5000/product/${id}/review`, {
         user: userId,
         userName: userName,
@@ -162,18 +148,18 @@ const ProductPage = () => {
       });
 
       if (res.status === 201) {
-        // Update the product with the new review
+        // Product state mein new review add karta hai
         setProduct(prev => ({
           ...prev,
           reviews: [...(prev.reviews || []), res.data.review]
         }));
-        setReviewText('');
-        setReviewRating(5);
+        setReviewText(''); // Form clear karta hai
+        setReviewRating(5); // Rating reset karta hai
 
-        // Show success message
+        // Success message show karta hai
         alert('✅ Review submitted successfully! Thank you for your feedback.');
 
-        // Scroll to reviews section
+        // Reviews section par scroll karta hai
         setTimeout(() => {
           const reviewsSection = document.querySelector('[data-reviews-section]');
           if (reviewsSection) {
@@ -190,6 +176,7 @@ const ProductPage = () => {
     }
   };
 
+  // Review delete karne ka function
   const handleDeleteReview = async (reviewId) => {
     if (!window.confirm('Are you sure you want to delete this review?')) {
       return;
@@ -198,12 +185,13 @@ const ProductPage = () => {
     try {
       const userId = localStorage.getItem("userId");
 
+      // Backend se review delete karta hai
       const res = await axios.delete(`http://localhost:5000/product/${id}/review/${reviewId}`, {
         data: { user: userId }
       });
 
       if (res.status === 200) {
-        // Remove the review from the product state
+        // Product state se review remove karta hai
         setProduct(prev => ({
           ...prev,
           reviews: prev.reviews.filter(review => review._id !== reviewId)
@@ -218,259 +206,247 @@ const ProductPage = () => {
     }
   };
 
+  // Related product par click karne ka function
   const handleRelatedProductClick = (productId) => {
-    // Scroll to top before navigation
+    // Navigation se pehle top par scroll karta hai
     window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate(`/product/${productId}`);
   };
 
-  // Calculate average rating from reviews
+  // Reviews se average rating calculate karta hai
   const avgRating = product && product.reviews && product.reviews.length > 0
     ? (product.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / product.reviews.length)
-    : product?.rating || 0;
+    : 0;
 
-  if (loading) return <Loader />;
-  if (error) return <div>Error: {error}</div>;
-  if (!product) return <div>No product found.</div>;
+  // Loading state - spinner show karta hai
+  if (loading) {
+    return <Loader />;
+  }
+
+  // Error state - error message show karta hai
+  if (error) {
+    return (
+      <div>
+        <NavBar />
+        <div className="error-container">
+          <h2>Error: {error}</h2>
+          <button onClick={() => navigate('/')}>Go Home</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Product nahi mila to error show karta hai
+  if (!product) {
+    return (
+      <div>
+        <NavBar />
+        <div className="error-container">
+          <h2>Product not found</h2>
+          <button onClick={() => navigate('/')}>Go Home</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
+    <div className="product-page">
       <NavBar />
-      <Stack spacing={4} sx={{ maxWidth: 900, margin: 'auto', p: 3 }}>
-        <Card sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, p: 2 }}>
-          <CardContent sx={{ flex: 1 }}>
-            <img src={product.image || product.images?.[0]} alt={product.name || product.title} style={{ maxWidth: 300, borderRadius: 8, marginBottom: 16 }} />
-          </CardContent>
-          <CardContent sx={{ flex: 2 }}>
-            <Typography variant="h4" gutterBottom>{product.name || product.title}</Typography>
-            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-              <Rating value={avgRating} precision={0.5} readOnly />
-              <Typography variant="body1">{avgRating.toFixed(1)} / 5</Typography>
-            </Stack>
-            <Typography variant="h5" color="primary" fontWeight={700} mb={1}>₹ {product.price}</Typography>
-            <Typography variant="body1" mb={2}>{product.description}</Typography>
-            <Typography variant="body2" color={product.stock > 0 ? 'success.main' : 'error.main'} mb={2}>
-              <b>Stock:</b> {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
-            </Typography>
-            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-              <TextField
-                inputRef={amountInputRef}
-                type="number"
-                label="Quantity"
-                size="small"
-                InputProps={{ inputProps: { min: 1, max: product.stock || 10 } }}
-                defaultValue={1}
-                sx={{ width: 100 }}
-              />
-              <Button variant="contained" color="primary" onClick={handleAddToCart} disabled={product.stock <= 0}>
-                Add to Cart
-              </Button>
-              <Button variant="contained" color="secondary" onClick={handleCheckout} disabled={product.stock <= 0}>
-                Checkout
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
 
-        {/* Reviews */}
-        <Card data-reviews-section>
+      {/* Main product details section */}
+      <div className="product-container">
+        <Grid container spacing={3}>
+          {/* Product image section */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardMedia
+                component="img"
+                height="400"
+                image={product.image}
+                alt={product.name}
+                style={{ objectFit: 'cover' }}
+              />
+            </Card>
+          </Grid>
+
+          {/* Product info section */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h4" gutterBottom>
+                  {product.name}
+                </Typography>
+
+                {/* Rating display */}
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Rating value={avgRating} readOnly precision={0.5} />
+                  <Typography variant="body2" ml={1}>
+                    ({product.reviews?.length || 0} reviews)
+                  </Typography>
+                </Box>
+
+                <Typography variant="h5" color="primary" gutterBottom>
+                  ₹{product.price}
+                </Typography>
+
+                <Typography variant="body1" paragraph>
+                  {product.description}
+                </Typography>
+
+                {/* Quantity input */}
+                <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                  <Typography>Quantity:</Typography>
+                  <TextField
+                    type="number"
+                    inputRef={amountInputRef}
+                    defaultValue={1}
+                    min={1}
+                    max={10}
+                    size="small"
+                    style={{ width: '80px' }}
+                  />
+                </Stack>
+
+                {/* Action buttons */}
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleAddToCart}
+                  >
+                    Add to Cart
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={handleCheckout}
+                  >
+                    Buy Now
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Reviews section */}
+        <Card sx={{ mt: 3 }}>
           <CardContent>
-            <Typography variant="h5" gutterBottom>Reviews</Typography>
+            <Typography variant="h6" gutterBottom data-reviews-section>
+              Reviews ({product.reviews?.length || 0})
+            </Typography>
+
+            {/* Review form - agar user review kar sakta hai */}
+            {canReview && (
+              <Box mb={3}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Write a Review
+                </Typography>
+                <form onSubmit={handleReviewSubmit}>
+                  <Stack spacing={2}>
+                    <Rating
+                      value={reviewRating}
+                      onChange={(event, newValue) => setReviewRating(newValue)}
+                      size="large"
+                    />
+                    <TextField
+                      multiline
+                      rows={3}
+                      placeholder="Write your review..."
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      required
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={reviewLoading}
+                    >
+                      {reviewLoading ? 'Submitting...' : 'Submit Review'}
+                    </Button>
+                  </Stack>
+                </form>
+              </Box>
+            )}
+
+            {/* Reviews list */}
             {product.reviews && product.reviews.length > 0 ? (
               <Stack spacing={2}>
-                {product.reviews.map((r, i) => (
-                  <Card key={i} variant="outlined" sx={{ p: 2 }}>
-                    <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                        <Typography fontWeight={700}>{r.userName || "Anonymous"}</Typography>
-                      <Rating value={r.rating} readOnly size="small" />
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(r.date).toLocaleDateString()}
+                {product.reviews.map((review, index) => (
+                  <Card key={review._id || index} variant="outlined">
+                    <CardContent>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="subtitle1">
+                          {review.userName}
                         </Typography>
-                      </Stack>
-                      {/* Show delete button if this is the user's review */}
-                      {token && (r.user === localStorage.getItem("userId") || r.userName === localStorage.getItem("username")) && (
+                        <Rating value={review.rating} readOnly size="small" />
+                      </Box>
+                      <Typography variant="body2" color="text.secondary">
+                        {review.comment}
+                      </Typography>
+                      {/* Delete button - agar user ne ye review diya hai */}
+                      {review.user === localStorage.getItem("userId") && (
                         <Button
                           size="small"
                           color="error"
-                          variant="outlined"
-                          onClick={() => handleDeleteReview(r._id)}
-                          sx={{ minWidth: 'auto', px: 1 }}
+                          onClick={() => handleDeleteReview(review._id)}
+                          sx={{ mt: 1 }}
                         >
-                          🗑️ Delete
+                          Delete
                         </Button>
                       )}
-                    </Stack>
-                    <Typography variant="body2" mt={1}>{r.comment}</Typography>
+                    </CardContent>
                   </Card>
                 ))}
               </Stack>
-            ) : <Typography color="text.secondary">No reviews yet. Be the first to review this product!</Typography>}
-
-            {/* Review Form and Eligibility Message */}
-            {token && (
-              canReview ? (
-                <Box sx={{ mt: 3, p: 2, bgcolor: 'success.light', borderRadius: 2 }}>
-                  <Typography variant="h6" gutterBottom color="success.contrastText">
-                    ✅ Write a Review
-                  </Typography>
-                  <form onSubmit={handleReviewSubmit}>
-                    <Stack spacing={2} maxWidth={400}>
-                      <TextField
-                        label="Your Review"
-                        multiline
-                        rows={3}
-                        value={reviewText}
-                        onChange={e => setReviewText(e.target.value)}
-                        required
-                        placeholder="Share your experience with this product..."
-                      />
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        <Typography>Rating:</Typography>
-                        <Rating
-                          value={reviewRating}
-                          onChange={(_, val) => setReviewRating(val)}
-                          max={5}
-                        />
-                      </Stack>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        disabled={reviewLoading || !reviewText.trim()}
-                        sx={{ alignSelf: 'flex-start' }}
-                      >
-                        {reviewLoading ? 'Submitting...' : 'Submit Review'}
-                      </Button>
-                    </Stack>
-                  </form>
-                </Box>
-              ) : (
-                <Box sx={{ mt: 3, p: 2, bgcolor: 'warning.light', borderRadius: 2 }}>
-                  <Typography variant="body2" color="warning.contrastText">
-                    To write a review, you should have bought this product.
-                  </Typography>
-                </Box>
-              )
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No reviews yet. Be the first to review this product!
+              </Typography>
             )}
-            {/* End Review Form and Eligibility Message */}
           </CardContent>
         </Card>
 
-        {/* Related Products */}
+        {/* Related products section */}
         {related.length > 0 && (
-          <Card>
+          <Card sx={{ mt: 3 }}>
             <CardContent>
-              <Typography variant="h5" gutterBottom>Related Products</Typography>
+              <Typography variant="h6" gutterBottom>
+                Related Products
+              </Typography>
               <Grid container spacing={2}>
-                {related.map(prod => (
-                  <Grid item xs={12} sm={6} md={4} key={prod._id}>
-                    <Card
-                      sx={{
-                        cursor: 'pointer',
-                        height: '100%',
-                        borderRadius: 2,
-                        boxShadow: 2,
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          boxShadow: 6,
-                          transform: 'translateY(-4px)',
-                          '& .product-image': {
-                            transform: 'scale(1.05)'
-                          }
-                        }
-                      }}
-                      onClick={() => handleRelatedProductClick(prod._id)}
-                    >
-                      <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                        <Box sx={{
-                          height: 150,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          mb: 1,
-                          overflow: 'hidden',
-                          borderRadius: 1
-                        }}>
-                          <img
-                            src={prod.image || prod.images?.[0]}
-                            alt={prod.name || prod.title}
-                            className="product-image"
-                            style={{
-                              maxWidth: '100%',
-                              maxHeight: '100%',
-                              objectFit: 'contain',
-                              transition: 'transform 0.3s ease'
-                            }}
-                          />
-                        </Box>
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight={600}
-                          sx={{
-                            mb: 0.5,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            lineHeight: 1.2
-                          }}
-                        >
-                          {prod.name || prod.title}
-                        </Typography>
-                        <Typography
-                          variant="h6"
-                          color="primary"
-                          fontWeight={700}
-                          sx={{ mb: 0.5 }}
-                        >
-                          ₹ {prod.price}
-                        </Typography>
-                        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 'auto' }}>
-                          <Rating
-                            value={prod.rating}
-                            precision={0.5}
-                            readOnly
-                            size="small"
-                            sx={{
-                              "& .MuiRating-iconFilled": {
-                                color: "#f39c12",
-                              },
-                            }}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            ({prod.rating})
-                          </Typography>
-                        </Stack>
-                      </Box>
-                    </Card>
+                {related.map((relatedProduct) => (
+                  <Grid item xs={12} sm={6} md={4} key={relatedProduct._id}>
+                    <ProductCard
+                      product={relatedProduct}
+                      onClick={() => handleRelatedProductClick(relatedProduct._id)}
+                    />
                   </Grid>
                 ))}
               </Grid>
             </CardContent>
           </Card>
         )}
-      </Stack>
+      </div>
 
-      {/* Confirmation Dialog */}
+      {/* Checkout confirmation dialog */}
       <Dialog open={confirmShow} onClose={handleCancel}>
-        <DialogTitle>Go to Cart</DialogTitle>
+        <DialogTitle>Confirm Purchase</DialogTitle>
         <DialogContent>
           <Typography>
-            Would you like to go to your cart to complete the checkout process?
+            Are you sure you want to proceed to checkout with this item?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm} variant="contained" color="primary">
-            Go to Cart
+          <Button onClick={handleCancel}>Cancel</Button>
+          <Button onClick={handleConfirm} variant="contained">
+            Proceed to Cart
           </Button>
         </DialogActions>
       </Dialog>
+
       <Footer />
-    </>
+    </div>
   );
 };
 

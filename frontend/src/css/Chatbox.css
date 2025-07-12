@@ -1,4 +1,4 @@
-/* Layout wrapper */
+/* Main layout wrapper - chat ko center mein rakhta hai */
 .chat-wrapper {
   display: flex;
   justify-content: center;
@@ -11,25 +11,99 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
-/* Assistant image section */
+/* Left side - Eva ki image aur info section */
 .chat-left {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
 }
 
+/* Eva ki image - floating animation ke saath */
 .assistant-img {
   width: 240px;
   animation: float 3s ease-in-out infinite;
 }
 
+/* Eva ki info box - name, description, status */
+.assistant-info {
+  text-align: center;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+}
+
+.assistant-info h3 {
+  margin: 0 0 5px 0;
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.assistant-info p {
+  margin: 0 0 10px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Online/offline status indicator */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #059669;
+  font-weight: 500;
+}
+
+/* Status dot - green for online, red for offline */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.online {
+  background: #10b981;
+}
+
+.status-dot.offline {
+  background: #ef4444;
+  animation: none;
+}
+
+/* Connection warning - offline hone par show hota hai */
+.connection-warning {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #ef4444;
+  background: #fef2f2;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+}
+
+/* Pulse animation - status dot ke liye */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Float animation - Eva ki image ke liye */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
 
-/* Chat container */
+/* Main chat container - right side */
 .chat-container {
-  width: 400px;
-  height: 550px; /* Add a fixed height */
+  width: 450px;
+  height: 600px;
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
@@ -38,103 +112,278 @@
   overflow: hidden;
 }
 
-
-/* Header */
+/* Chat header - title aur buttons */
 .chat-header {
   padding: 18px 24px;
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   font-size: 18px;
   font-weight: 600;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Chat messages box */
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-icon {
+  font-size: 20px;
+}
+
+/* Offline badge - header mein show hota hai */
+.offline-badge {
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Action buttons - clear chat etc. */
+.action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+/* Chat messages area - scrollable */
 .chat-box {
   flex-grow: 1;
-  min-height: 0; /* Important for flex children inside fixed-size container */
   padding: 20px;
   overflow-y: auto;
-  max-height: 350px; /* already present — keep or adjust as needed */
   display: flex;
   flex-direction: column;
   gap: 12px;
   scroll-behavior: smooth;
+  background: #f8fafc;
 }
 
-/* Messages */
+/* Individual messages */
 .chat-message {
   padding: 12px 16px;
   border-radius: 18px;
-  max-width: 75%;
+  max-width: 80%;
   font-size: 15px;
   line-height: 1.4;
   animation: fadeIn 0.3s ease-out;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
+/* User messages - right side, green background */
 .chat-message.user {
-  background: #dcfce7;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
   align-self: flex-end;
   color: #1f2937;
+  border-bottom-right-radius: 6px;
 }
 
+/* Bot messages - left side, white background */
 .chat-message.bot {
-  background: #f3f4f6;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
   align-self: flex-start;
   color: #374151;
+  border-bottom-left-radius: 6px;
+  border: 1px solid #e5e7eb;
 }
 
+/* Typing indicator message */
+.chat-message.typing {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+.message-content {
+  margin-bottom: 8px;
+}
+
+/* Message suggestions - clickable buttons */
+.message-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.suggestion-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.suggestion-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}
+
+/* Typing indicator - 3 dots animation */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background: #9ca3af;
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+/* Typing animation */
+@keyframes typing {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Message fade in animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Input form */
-.chat-input-form {
+/* Quick action buttons - bottom section */
+.quick-actions {
   display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #f8fafc;
   border-top: 1px solid #e5e7eb;
-  padding: 12px;
-  background: #f9fafb;
+  flex-wrap: wrap;
 }
 
-.chat-input-form input {
-  flex: 1;
+.quick-action-btn {
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
   border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.quick-action-btn:hover {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quick-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Input form - message type karne ke liye */
+.chat-input-form {
+  padding: 16px 20px;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Input field */
+.chat-input {
+  flex: 1;
+  border: 2px solid #e5e7eb;
+  border-radius: 24px;
+  padding: 12px 16px;
   font-size: 15px;
   outline: none;
   background: #ffffff;
-  transition: border 0.2s ease;
+  transition: all 0.2s ease;
 }
 
-.chat-input-form input:focus {
+.chat-input:focus {
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.chat-input-form button {
-  margin-left: 10px;
-  padding: 12px 20px;
-  background: #2563eb;
+.chat-input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Send button - circular design */
+.send-btn {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 50%;
+  font-size: 16px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.chat-input-form button:hover {
-  background: #1e40af;
+.send-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: scale(1.05);
 }
 
-/* Responsive: stack layout on small screens */
+.send-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mobile responsive - small screens ke liye */
 @media (max-width: 768px) {
   .chat-wrapper {
     flex-direction: column;
     align-items: center;
+    padding: 20px 10px;
   }
 
   .assistant-img {
@@ -144,5 +393,37 @@
   .chat-container {
     width: 100%;
     max-width: 95vw;
+    height: 500px;
   }
+
+  .quick-actions {
+    padding: 8px 12px;
+  }
+
+  .quick-action-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .chat-input-form {
+    padding: 12px 16px;
+  }
+}
+
+/* Custom scrollbar styling */
+.chat-box::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

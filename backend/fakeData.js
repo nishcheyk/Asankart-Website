@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Product = require("./Models/products");
+const { User } = require("./Models/user");
+const { Order } = require("./Models/orders");
 
 // Connect to MongoDB
 mongoose.connect("mongodb://localhost:27017/ECommerce", {
@@ -28,18 +30,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Rahul Sharma",
+        userName: "Rahul Sharma",
         rating: 5,
         comment: "Amazing phone! The camera quality is outstanding and the battery life is incredible. Worth every penny.",
         date: new Date("2024-01-15")
       },
       {
         user: "Priya Patel",
+        userName: "Priya Patel",
         rating: 4,
         comment: "Great phone but a bit expensive. The performance is excellent and the design is beautiful.",
         date: new Date("2024-01-20")
       },
       {
         user: "Amit Kumar",
+        userName: "Amit Kumar",
         rating: 5,
         comment: "Best iPhone I've ever owned. The titanium finish feels premium and the camera system is revolutionary.",
         date: new Date("2024-01-25")
@@ -66,18 +71,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Neha Singh",
+        userName: "Neha Singh",
         rating: 5,
         comment: "The S Pen is a game changer! AI features are incredible and the camera quality is top-notch.",
         date: new Date("2024-02-01")
       },
       {
         user: "Vikram Malhotra",
+        userName: "Vikram Malhotra",
         rating: 4,
         comment: "Excellent phone with great features. The battery life is impressive and the display is stunning.",
         date: new Date("2024-02-05")
       },
       {
         user: "Anjali Desai",
+        userName: "Anjali Desai",
         rating: 5,
         comment: "Love the AI features and the S Pen functionality. This phone exceeds all expectations!",
         date: new Date("2024-02-10")
@@ -104,18 +112,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Rajesh Mehta",
+        userName: "Rajesh Mehta",
         rating: 5,
         comment: "Incredible performance! The M3 Pro chip is blazing fast and the display is absolutely stunning.",
         date: new Date("2024-01-10")
       },
       {
         user: "Sneha Reddy",
+        userName: "Sneha Reddy",
         rating: 5,
         comment: "Perfect for video editing and 3D rendering. The battery life is amazing and the build quality is premium.",
         date: new Date("2024-01-18")
       },
       {
         user: "Arjun Verma",
+        userName: "Arjun Verma",
         rating: 4,
         comment: "Excellent laptop for development work. The performance is outstanding and the keyboard feels great.",
         date: new Date("2024-01-25")
@@ -142,18 +153,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Kavya Iyer",
+        userName: "Kavya Iyer",
         rating: 4,
         comment: "Great laptop for work and gaming. The OLED display is beautiful and the performance is solid.",
         date: new Date("2024-02-02")
       },
       {
         user: "Rohan Gupta",
+        userName: "Rohan Gupta",
         rating: 5,
         comment: "Excellent build quality and performance. The keyboard is comfortable and the trackpad is responsive.",
         date: new Date("2024-02-08")
       },
       {
         user: "Zara Khan",
+        userName: "Zara Khan",
         rating: 4,
         comment: "Perfect for creative work. The display is stunning and the performance handles everything I throw at it.",
         date: new Date("2024-02-15")
@@ -180,18 +194,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Aditya Sharma",
+        userName: "Aditya Sharma",
         rating: 5,
         comment: "Incredible sound quality and noise cancellation! These headphones are worth every penny.",
         date: new Date("2024-01-05")
       },
       {
         user: "Meera Patel",
+        userName: "Meera Patel",
         rating: 4,
         comment: "Great headphones with excellent battery life. The noise cancellation works perfectly.",
         date: new Date("2024-01-12")
       },
       {
         user: "Karan Singh",
+        userName: "Karan Singh",
         rating: 5,
         comment: "Best headphones I've ever owned. The sound quality is amazing and they're so comfortable.",
         date: new Date("2024-01-20")
@@ -218,18 +235,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Nisha Reddy",
+        userName: "Nisha Reddy",
         rating: 5,
         comment: "Perfect earbuds! The noise cancellation is incredible and the sound quality is amazing.",
         date: new Date("2024-01-08")
       },
       {
         user: "Vivek Malhotra",
+        userName: "Vivek Malhotra",
         rating: 4,
         comment: "Great earbuds with good battery life. The spatial audio feature is really impressive.",
         date: new Date("2024-01-15")
       },
       {
         user: "Ananya Desai",
+        userName: "Ananya Desai",
         rating: 5,
         comment: "Love these earbuds! They fit perfectly and the sound quality is outstanding.",
         date: new Date("2024-01-22")
@@ -256,18 +276,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Aryan Kumar",
+        userName: "Aryan Kumar",
         rating: 5,
         comment: "Classic design and great quality! These Jordans are absolutely perfect.",
         date: new Date("2024-01-03")
       },
       {
         user: "Ishaan Patel",
+        userName: "Ishaan Patel",
         rating: 5,
         comment: "Amazing shoes! The leather quality is premium and they're so comfortable.",
         date: new Date("2024-01-10")
       },
       {
         user: "Riya Sharma",
+        userName: "Riya Sharma",
         rating: 4,
         comment: "Great shoes with iconic design. Perfect for both style and comfort.",
         date: new Date("2024-01-18")
@@ -294,18 +317,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Priyanka Singh",
+        userName: "Priyanka Singh",
         rating: 4,
         comment: "Excellent running shoes! The Boost technology provides amazing energy return.",
         date: new Date("2024-01-07")
       },
       {
         user: "Rahul Verma",
+        userName: "Rahul Verma",
         rating: 5,
         comment: "Best running shoes I've ever worn. Super comfortable and great for long runs.",
         date: new Date("2024-01-14")
       },
       {
         user: "Neha Iyer",
+        userName: "Neha Iyer",
         rating: 4,
         comment: "Great shoes with excellent cushioning. Perfect for daily runs and training.",
         date: new Date("2024-01-21")
@@ -332,18 +358,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Arjun Malhotra",
+        userName: "Arjun Malhotra",
         rating: 5,
         comment: "Incredible picture quality! The QLED technology makes colors pop and the sound is amazing.",
         date: new Date("2024-01-12")
       },
       {
         user: "Kavya Reddy",
+        userName: "Kavya Reddy",
         rating: 4,
         comment: "Great TV with excellent picture quality. The smart features work perfectly.",
         date: new Date("2024-01-19")
       },
       {
         user: "Vikram Singh",
+        userName: "Vikram Singh",
         rating: 5,
         comment: "Best TV I've ever owned. The picture quality is stunning and the build quality is premium.",
         date: new Date("2024-01-26")
@@ -370,18 +399,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Anjali Patel",
+        userName: "Anjali Patel",
         rating: 5,
         comment: "Perfect blacks and incredible picture quality! OLED technology is truly amazing.",
         date: new Date("2024-01-15")
       },
       {
         user: "Rohan Kumar",
+        userName: "Rohan Kumar",
         rating: 4,
         comment: "Excellent TV with great picture quality. The webOS interface is user-friendly.",
         date: new Date("2024-01-22")
       },
       {
         user: "Zara Sharma",
+        userName: "Zara Sharma",
         rating: 5,
         comment: "Incredible viewing experience! The picture quality is unmatched and the sound is great.",
         date: new Date("2024-01-29")
@@ -408,18 +440,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Vikram Desai",
+        userName: "Vikram Desai",
         rating: 5,
         comment: "Incredible camera! The 8K video quality is stunning and the autofocus is lightning fast.",
         date: new Date("2024-01-05")
       },
       {
         user: "Priya Malhotra",
+        userName: "Priya Malhotra",
         rating: 5,
         comment: "Professional grade camera with amazing image quality. Perfect for wedding photography.",
         date: new Date("2024-01-12")
       },
       {
         user: "Arjun Singh",
+        userName: "Arjun Singh",
         rating: 4,
         comment: "Excellent camera with great features. The image stabilization works perfectly.",
         date: new Date("2024-01-19")
@@ -446,18 +481,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Neha Kumar",
+        userName: "Neha Kumar",
         rating: 5,
         comment: "Amazing camera with incredible autofocus! The video quality is outstanding.",
         date: new Date("2024-01-08")
       },
       {
         user: "Rahul Patel",
+        userName: "Rahul Patel",
         rating: 4,
         comment: "Great camera for both photography and videography. The eye autofocus is impressive.",
         date: new Date("2024-01-15")
       },
       {
         user: "Anjali Sharma",
+        userName: "Anjali Sharma",
         rating: 5,
         comment: "Perfect camera for professional work. The image quality is exceptional.",
         date: new Date("2024-01-22")
@@ -484,18 +522,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Kavya Iyer",
+        userName: "Kavya Iyer",
         rating: 5,
         comment: "Incredible tablet! The M2 chip makes it as powerful as a laptop. Perfect for creative work.",
         date: new Date("2024-01-10")
       },
       {
         user: "Vikram Reddy",
+        userName: "Vikram Reddy",
         rating: 4,
         comment: "Great tablet with amazing display. The Apple Pencil integration is seamless.",
         date: new Date("2024-01-17")
       },
       {
         user: "Priya Singh",
+        userName: "Priya Singh",
         rating: 5,
         comment: "Best tablet I've ever used. The performance is outstanding and the display is stunning.",
         date: new Date("2024-01-24")
@@ -522,18 +563,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Rohan Malhotra",
+        userName: "Rohan Malhotra",
         rating: 4,
         comment: "Excellent tablet with great performance. The S Pen works perfectly for note-taking.",
         date: new Date("2024-01-06")
       },
       {
         user: "Ananya Patel",
+        userName: "Ananya Patel",
         rating: 5,
         comment: "Amazing tablet! The display is beautiful and the battery life is impressive.",
         date: new Date("2024-01-13")
       },
       {
         user: "Arjun Kumar",
+        userName: "Arjun Kumar",
         rating: 4,
         comment: "Great Android tablet with premium features. Perfect for productivity and entertainment.",
         date: new Date("2024-01-20")
@@ -560,18 +604,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Aditya Sharma",
+        userName: "Aditya Sharma",
         rating: 5,
         comment: "Incredible drone! The camera quality is amazing and it's so easy to fly.",
         date: new Date("2024-01-03")
       },
       {
         user: "Meera Patel",
+        userName: "Meera Patel",
         rating: 4,
         comment: "Great drone with excellent flight time. The obstacle avoidance works perfectly.",
         date: new Date("2024-01-10")
       },
       {
         user: "Karan Singh",
+        userName: "Karan Singh",
         rating: 5,
         comment: "Best drone I've ever owned. The video quality is stunning and it's very stable.",
         date: new Date("2024-01-17")
@@ -598,18 +645,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Nisha Reddy",
+        userName: "Nisha Reddy",
         rating: 5,
         comment: "Amazing action camera! The stabilization is incredible and the video quality is outstanding.",
         date: new Date("2024-01-05")
       },
       {
         user: "Vivek Malhotra",
+        userName: "Vivek Malhotra",
         rating: 4,
         comment: "Great camera for adventure sports. The battery life is good and it's very durable.",
         date: new Date("2024-01-12")
       },
       {
         user: "Ananya Desai",
+        userName: "Ananya Desai",
         rating: 5,
         comment: "Perfect for capturing action shots. The HyperSmooth stabilization is game-changing.",
         date: new Date("2024-01-19")
@@ -636,18 +686,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Rahul Kumar",
+        userName: "Rahul Kumar",
         rating: 5,
         comment: "Incredible smartwatch! The health features are amazing and the battery life is great.",
         date: new Date("2024-01-08")
       },
       {
         user: "Priya Singh",
+        userName: "Priya Singh",
         rating: 4,
         comment: "Great watch with excellent health monitoring. The ECG feature is very useful.",
         date: new Date("2024-01-15")
       },
       {
         user: "Arjun Patel",
+        userName: "Arjun Patel",
         rating: 5,
         comment: "Best smartwatch I've ever owned. The fitness tracking is accurate and the display is beautiful.",
         date: new Date("2024-01-22")
@@ -674,18 +727,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Neha Iyer",
+        userName: "Neha Iyer",
         rating: 4,
         comment: "Great smartwatch with beautiful design. The rotating bezel is very intuitive.",
         date: new Date("2024-01-06")
       },
       {
         user: "Vikram Reddy",
+        userName: "Vikram Reddy",
         rating: 5,
         comment: "Excellent watch with great health features. The battery life is impressive.",
         date: new Date("2024-01-13")
       },
       {
         user: "Anjali Malhotra",
+        userName: "Anjali Malhotra",
         rating: 4,
         comment: "Perfect Android smartwatch. The Wear OS integration is seamless.",
         date: new Date("2024-01-20")
@@ -712,18 +768,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Aryan Sharma",
+        userName: "Aryan Sharma",
         rating: 5,
         comment: "Incredible gaming console! The graphics are stunning and the loading times are lightning fast.",
         date: new Date("2024-01-10")
       },
       {
         user: "Ishaan Patel",
+        userName: "Ishaan Patel",
         rating: 5,
         comment: "Best gaming experience ever! The DualSense controller is revolutionary.",
         date: new Date("2024-01-17")
       },
       {
         user: "Riya Kumar",
+        userName: "Riya Kumar",
         rating: 4,
         comment: "Amazing console with great performance. The SSD makes a huge difference in loading times.",
         date: new Date("2024-01-24")
@@ -750,18 +809,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Karan Singh",
+        userName: "Karan Singh",
         rating: 5,
         comment: "Amazing gaming console! Game Pass is incredible and the performance is outstanding.",
         date: new Date("2024-01-12")
       },
       {
         user: "Priyanka Malhotra",
+        userName: "Priyanka Malhotra",
         rating: 4,
         comment: "Great console with excellent graphics. Quick Resume feature is very convenient.",
         date: new Date("2024-01-19")
       },
       {
         user: "Rahul Iyer",
+        userName: "Rahul Iyer",
         rating: 5,
         comment: "Best Xbox ever! The 4K gaming experience is incredible and Game Pass is a game changer.",
         date: new Date("2024-01-26")
@@ -788,18 +850,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Aditya Patel",
+        userName: "Aditya Patel",
         rating: 5,
         comment: "Perfect portable gaming console! The OLED screen is beautiful and the battery life is great.",
         date: new Date("2024-01-08")
       },
       {
         user: "Meera Kumar",
+        userName: "Meera Kumar",
         rating: 4,
         comment: "Great console for both portable and TV gaming. The Joy-Con controllers are comfortable.",
         date: new Date("2024-01-15")
       },
       {
         user: "Karan Sharma",
+        userName: "Karan Sharma",
         rating: 5,
         comment: "Amazing hybrid console! The OLED display makes games look incredible.",
         date: new Date("2024-01-22")
@@ -826,18 +891,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Anjali Reddy",
+        userName: "Anjali Reddy",
         rating: 5,
         comment: "Incredible vacuum! The laser technology shows every speck of dust and the suction is powerful.",
         date: new Date("2024-01-05")
       },
       {
         user: "Vikram Singh",
+        userName: "Vikram Singh",
         rating: 4,
         comment: "Great cordless vacuum with excellent battery life. The HEPA filter works perfectly.",
         date: new Date("2024-01-12")
       },
       {
         user: "Priya Malhotra",
+        userName: "Priya Malhotra",
         rating: 5,
         comment: "Best vacuum I've ever owned. The laser feature is amazing and it's so easy to use.",
         date: new Date("2024-01-19")
@@ -864,18 +932,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Rahul Iyer",
+        userName: "Rahul Iyer",
         rating: 4,
         comment: "Great refrigerator with smart features. The Family Hub is very useful for managing groceries.",
         date: new Date("2024-01-10")
       },
       {
         user: "Kavya Patel",
+        userName: "Kavya Patel",
         rating: 5,
         comment: "Amazing smart refrigerator! The customizable panels look beautiful and the capacity is huge.",
         date: new Date("2024-01-17")
       },
       {
         user: "Arjun Kumar",
+        userName: "Arjun Kumar",
         rating: 4,
         comment: "Excellent refrigerator with great features. The AI food management is very helpful.",
         date: new Date("2024-01-24")
@@ -902,18 +973,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Neha Sharma",
+        userName: "Neha Sharma",
         rating: 5,
         comment: "Excellent washing machine! The AI features work perfectly and clothes come out very clean.",
         date: new Date("2024-01-08")
       },
       {
         user: "Vikram Reddy",
+        userName: "Vikram Reddy",
         rating: 4,
         comment: "Great washing machine with smart features. The steam function is very effective.",
         date: new Date("2024-01-15")
       },
       {
         user: "Priya Singh",
+        userName: "Priya Singh",
         rating: 5,
         comment: "Best washing machine I've ever used. The 6 Motion technology ensures perfect cleaning.",
         date: new Date("2024-01-22")
@@ -940,18 +1014,21 @@ const fakeProducts = [
     reviews: [
       {
         user: "Aditya Malhotra",
+        userName: "Aditya Malhotra",
         rating: 5,
         comment: "Incredible noise cancellation! These headphones are perfect for travel and work.",
         date: new Date("2024-01-06")
       },
       {
         user: "Meera Kumar",
+        userName: "Meera Kumar",
         rating: 4,
         comment: "Great headphones with excellent comfort. The battery life is impressive.",
         date: new Date("2024-01-13")
       },
       {
         user: "Karan Patel",
+        userName: "Karan Patel",
         rating: 5,
         comment: "Best noise-canceling headphones I've ever used. The sound quality is amazing.",
         date: new Date("2024-01-20")
@@ -978,10 +1055,17 @@ const insertFakeData = async () => {
     });
 
     mongoose.connection.close();
+    console.log("Database seeded successfully!");
   } catch (error) {
     console.error("Error inserting fake data:", error);
     mongoose.connection.close();
   }
 };
 
-insertFakeData();
+// Export for use in other scripts
+module.exports = { fakeProducts };
+
+// Run if this file is executed directly
+if (require.main === module) {
+  insertFakeData();
+}

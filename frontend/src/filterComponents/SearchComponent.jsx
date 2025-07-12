@@ -1,46 +1,78 @@
-import React, { memo } from "react";
-import TextField from "@mui/material/TextField";
-import { Search } from "@mui/icons-material";
+import React, { useState, useEffect } from 'react';
+import { TextField, InputAdornment, IconButton, Box } from '@mui/material';
+import { Search as SearchIcon, Clear as ClearIcon } from '@mui/icons-material';
 
-const SearchComponent = memo((props) => {
-  const getSearchQuery = (event) => {
-    props.onChange(event.target.value);
+// SearchComponent - products search karne ke liye
+const SearchComponent = ({ onSearch, placeholder = "Search products..." }) => {
+  // Search query state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  // Debounce search - user typing rokne ke 500ms baad search karta hai
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer); // Cleanup timer
+  }, [searchQuery]);
+
+  // Debounced query change hone par parent ko notify karta hai
+  useEffect(() => {
+    onSearch(debouncedQuery);
+  }, [debouncedQuery, onSearch]);
+
+  // Search input change handle karne ka function
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Clear search function
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setDebouncedQuery('');
   };
 
   return (
-    <div className="filter-section">
+    <Box sx={{ width: '100%', maxWidth: '400px' }}>
       <TextField
-        label="Search Products"
+        fullWidth
         variant="outlined"
-        size="small"
-        onChange={getSearchQuery}
-        value={props.searchValue || ""}
-        placeholder="Type to search..."
+        placeholder={placeholder}
+        value={searchQuery}
+        onChange={handleSearchChange}
         InputProps={{
-          startAdornment: <Search sx={{ color: 'text.secondary', mr: 1, fontSize: 16 }} />,
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon color="action" />
+            </InputAdornment>
+          ),
+          endAdornment: searchQuery && (
+            <InputAdornment position="end">
+              <IconButton
+                size="small"
+                onClick={handleClearSearch}
+                edge="end"
+              >
+                <ClearIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
         }}
         sx={{
-          width: '100%',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
           '& .MuiOutlinedInput-root': {
-            borderRadius: { xs: '8px', sm: '12px' },
-            fontSize: { xs: '13px', sm: '14px' },
+            borderRadius: '25px', // Rounded corners
             '&:hover fieldset': {
-              borderColor: '#667eea',
+              borderColor: 'primary.main',
             },
             '&.Mui-focused fieldset': {
-              borderColor: '#764ba2',
+              borderColor: 'primary.main',
             },
-          },
-          '& .MuiInputLabel-root': {
-            fontSize: { xs: '13px', sm: '14px' },
           },
         }}
       />
-    </div>
+    </Box>
   );
-});
-
-SearchComponent.displayName = 'SearchComponent';
+};
 
 export default SearchComponent;

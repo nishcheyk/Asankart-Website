@@ -1,93 +1,145 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Box, Typography, Button, Container } from "@mui/material";
+import { Home as HomeIcon, ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import "../css/Error404.css";
-function Error404() {
+
+// Error404 component - page not found error display karne ke liye
+const Error404 = () => {
+  const navigate = useNavigate(); // Navigation ke liye
+
+  // Home page par navigate karne ka function
+  const handleGoHome = () => {
+    navigate('/');
+  };
+
+  // Previous page par navigate karne ka function
+  const handleGoBack = () => {
+    navigate(-1); // Browser history mein peeche jata hai
+  };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        width: "100vw",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.1)", // Optional: light overlay
-        transform: "scale(1.5)",
-      }}
-    >
-      <div className="main_wrapper">
-        <div className="main">
-          <div className="antenna">
-            <div className="antenna_shadow"></div>
-            <div className="a1"></div>
-            <div className="a1d"></div>
-            <div className="a2"></div>
-            <div className="a2d"></div>
-            <div className="a_base"></div>
-          </div>
-          <div className="tv">
-            <div className="cruve">
-              <svg
-                className="curve_svg"
-                version="1.1"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 189.929 189.929"
-                xmlSpace="preserve"
-              >
-                <path
-                  d="M70.343,70.343c-30.554,30.553-44.806,72.7-39.102,115.635l-29.738,3.951C-5.442,137.659,11.917,86.34,49.129,49.13
-          C86.34,11.918,137.664-5.445,189.928,1.502l-3.95,29.738C143.041,25.54,100.895,39.789,70.343,70.343z"
-                ></path>
-              </svg>
-            </div>
-            <div className="display_div">
-              <div className="screen_out">
-                <div className="screen_out1">
-                  <div className="screen">
-                    <span className="notfound_text"> NOT FOUND</span>
-                  </div>
-                  <div className="screenM">
-                    <span className="notfound_text"> NOT FOUND</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="lines">
-              <div className="line1"></div>
-              <div className="line2"></div>
-              <div className="line3"></div>
-            </div>
-            <div className="buttons_div">
-              <div className="b1">
-                <div></div>
-              </div>
-              <div className="b2"></div>
-              <div className="speakers">
-                <div className="g1">
-                  <div className="g11"></div>
-                  <div className="g12"></div>
-                  <div className="g13"></div>
-                </div>
-                <div className="g"></div>
-                <div className="g"></div>
-              </div>
-            </div>
-          </div>
-          <div className="bottom">
-            <div className="base1"></div>
-            <div className="base2"></div>
-            <div className="base3"></div>
-          </div>
-        </div>
-        <div className="text_404">
-          <div className="text_4041">4</div>
-          <div className="text_4042">0</div>
-          <div className="text_4043">4</div>
-        </div>
-      </div>
-    </div>
+    <Container maxWidth="md">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '80vh', // Minimum height set karta hai
+          textAlign: 'center',
+          gap: 3, // Elements ke beech gap
+        }}
+        className="error-404-container"
+      >
+        {/* Error Icon - 404 number display */}
+        <Box
+          sx={{
+            fontSize: '8rem',
+            fontWeight: 'bold',
+            color: 'primary.main',
+            lineHeight: 1,
+            mb: 2,
+          }}
+          className="error-404-number"
+        >
+          404
+        </Box>
+
+        {/* Error Title */}
+        <Typography
+          variant="h3"
+          component="h1"
+          gutterBottom
+          sx={{
+            fontWeight: 'bold',
+            color: 'text.primary',
+          }}
+        >
+          Oops! Page Not Found
+        </Typography>
+
+        {/* Error Description */}
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          paragraph
+          sx={{
+            maxWidth: '600px',
+            mb: 4,
+          }}
+        >
+          Lagta hai aap jo page dhund rahe hain, woh exist nahi karta.
+          Ya to URL galat hai, ya page move/delete ho gaya hai.
+        </Typography>
+
+        {/* Action Buttons */}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            flexDirection: { xs: 'column', sm: 'row' }, // Mobile par column, desktop par row
+            alignItems: 'center',
+          }}
+        >
+          {/* Go Home Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<HomeIcon />}
+            onClick={handleGoHome}
+            sx={{
+              minWidth: '200px',
+              py: 1.5,
+              px: 3,
+            }}
+          >
+            Go to Homepage
+          </Button>
+
+          {/* Go Back Button */}
+          <Button
+            variant="outlined"
+            color="primary"
+            size="large"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleGoBack}
+            sx={{
+              minWidth: '200px',
+              py: 1.5,
+              px: 3,
+            }}
+          >
+            Go Back
+          </Button>
+        </Box>
+
+        {/* Additional Help Text */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            mt: 4,
+            maxWidth: '500px',
+          }}
+        >
+          Agar aapko lagta hai ki ye error galat hai, to please contact karein
+          our support team se. Hum aapki help karne ki koshish karenge.
+        </Typography>
+
+        {/* Contact Support Link */}
+        <Button
+          variant="text"
+          color="primary"
+          onClick={() => navigate('/contact')}
+          sx={{ mt: 2 }}
+        >
+          Contact Support
+        </Button>
+      </Box>
+    </Container>
   );
-}
+};
+
 export default Error404;
